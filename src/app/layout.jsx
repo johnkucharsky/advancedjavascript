@@ -10,7 +10,8 @@ export const metadata = {
   title: {
     template: "%s - Advanced JavaScript.",
   },
-  description: "Advanced JavaScript: Real-world knowledge",
+  description:
+    "Master advanced JavaScript with practical examples, real-world techniques, and in-depth explanations.",
   applicationName: "Advanced JavaScript",
   generator: "Next.js",
   appleWebApp: {
@@ -25,7 +26,8 @@ export const metadata = {
   },
   openGraph: {
     title: "Advanced JavaScript",
-    description: "Advanced JavaScript: Real-world knowledge",
+    description:
+      "Master advanced JavaScript with practical examples, real-world techniques, and in-depth explanations.",
     url: "https://www.advancedjavascript.org",
     siteName: "Advanced JavaScript",
     images: [
