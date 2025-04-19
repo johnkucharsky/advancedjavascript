@@ -1,0 +1,135 @@
+
+## type conversions
+
+[Operator precedence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_precedence)
+
+### plus
+
+Concatenates strings
+
+```js
+const log = (value) => console.log(value);
+
+log(null + 1); // 1
+log(undefined + 1); // NaN
+log(false + 1); // 1
+log(true + 1); // 2
+log("" + 1); // "1"
+log("s" + 1); // "s1"
+log("1" + 1); // "11"
+
+log(1 + null); // 1
+log(1 + undefined); // NaN
+log(1 + false); // 1
+log(1 + true); // 2
+log(1 + ""); // "1"
+log(1 + "s"); // "1s"
+log(1 + "1"); // "11"
+```
+
+### minus
+
+Behaves like other operators, converts to numbers
+
+```js
+const log = (value) => console.log(value);
+
+log(null - 1); // -1
+log(undefined - 1); // NaN
+log(false - 1); // -1
+log(true - 1); // 0
+log("" - 1); // -1
+log("s" - 1); // NaN
+log("1" - 1); // 0
+
+log(1 - null); // 1
+log(1 - undefined); // NaN
+log(1 - false); // 1
+log(1 - true); // 0
+log(1 - ""); // 1
+log(1 - "s"); // NaN
+log(1 - "1"); // 0
+```
+
+### comparisons
+
+When comparing values of different types,
+they convert to numbers
+
+```js
+const log = (value) => console.log(value);
+
+log(null < 1); // true
+log(undefined < 1); // false
+log(undefined > 1); // false
+log(false < 1); // true
+log(true > 0); // true
+log("" > 0); // false
+log("s" > 1); // false
+log("1" > 0); // true
+log("12" > "111"); // true
+log("12" > 111); // false
+log("break");
+log(null <= 1); // true
+log(null <= 0); // true
+log(undefined <= 1); // false
+log(undefined >= 1); // false
+log(false <= 1); // true
+log(true >= 0); // true
+log("" >= 0); // true
+log("s" >= 1); // false
+log("1" >= 0); // true
+log("12" >= "111"); // true
+log("12" >= 111); // false
+log("break");
+log("0" >= 0); // true
+```
+
+### equality
+
+Strict equality === doesn't convert values
+
+```js
+const log = (value) => console.log(value);
+
+log(null == null); // true
+log(undefined == undefined); // true
+log(undefined == null); // true
+log(null == undefined); // true
+log(0 == false); // true
+log(1 == true); // true
+log(0 == ""); // true
+log(1 == "s"); // false
+log(1 == "1"); // true
+// [] converted to ''
+log(0 == []); // true
+log(0 == {}); // false
+log("break");
+log(null === null); // true
+log(undefined === undefined); // true
+log(undefined === null); // false
+log([] === []); // false
+```
+
+### random conversions
+
+```js
+const log = (value) => console.log(value);
+
+log("10" + 2 * "5"); // 1010
+log("" + 0 + 1); // "01"
+log("" + 0 - 1); // -1
+log("" - 1 + 0); // -1
+log(true + false); // 1
+log(6 / "3"); // 2
+log("2" * "3"); // 6
+log(4 + 5 + "px"); // "9px"
+log("$" + 4 + 5); // "$45"
+log("4" - 2); // 2
+log("4px" - 2); // NaN
+log("  -9  " + 5); // "  -9  5"
+log("  -9  " - 5); // -14
+log(null + 1); // 1
+log(undefined + 1); // NaN
+log(" \t \n" - 2); // -2
+```

@@ -1,0 +1,70 @@
+
+## reduce
+
+The [`reduce()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+method executes a user-defined "reducer" callback function on each element of the array, in order.
+It accumulates a **single value** by applying the callback function and passing the result from one iteration to the next.
+
+The method can accept an **optional initial value**, and if not provided, it defaults to the first element in the array.
+This custom implementation mimics the native behavior.
+
+This example demonstrates usage of `reduce` for both synchronous and asynchronous operations, including practical examples
+like summing an array and composing a pipeline of functions.
+
+```js filename="reduce" copy
+Array.prototype.customReduce = function (callback, initialValue) {
+  let accumulator = initialValue !== undefined ? initialValue : this[0];
+
+  const startIndex = initialValue !== undefined ? 0 : 1;
+
+  for (let i = startIndex; i < this.length; i++) {
+    accumulator = callback(accumulator, this[i], i, this);
+  }
+
+  return accumulator;
+};
+
+const array1 = [15, 16, 17, 18, 19];
+
+const sumWithInitial = array1.customReduce((acc, cur) => acc + cur, 0);
+console.log(sumWithInitial); // 85
+
+const sumWithoutInitial = array1.customReduce((acc, cur) => acc + cur);
+console.log(sumWithoutInitial); // 85
+
+const pipe =
+  (...functions) =>
+  (initialValue) =>
+    functions.customReduce((acc, fn) => fn(acc), initialValue);
+
+const double = (x) => x * 2;
+const triple = (x) => x * 3;
+
+const multiply6 = pipe(double, triple);
+const multiply9 = pipe(triple, triple);
+
+console.log(multiply6(6)); // 36
+console.log(multiply9(9)); // 81
+
+const asyncPipe =
+  (...functions) =>
+  (initialValue) =>
+    functions.reduce((acc, fn) => acc.then(fn), Promise.resolve(initialValue));
+
+const p1 = async (a) => a * 5;
+const p2 = async (a) =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => resolve(a * 2), 1000);
+  });
+const f3 = (a) => a * 3;
+const p4 = async (a) => a * 4;
+
+asyncPipe(p1, p2, f3, p4)(10).then(console.log); // 1200
+
+const asyncPipeAsync =
+  (...functions) =>
+  (initialValue) =>
+    functions.reduce(async (acc, fn) => fn(await acc), initialValue);
+
+asyncPipeAsync(p1, p2, f3, p4)(10).then(console.log); // 1200
+```

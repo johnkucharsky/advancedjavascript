@@ -1,0 +1,46 @@
+
+## Topological Sort
+
+This example performs a [topological sort](https://en.wikipedia.org/wiki/Topological_sorting) on a set of items with dependencies.
+Each item can only appear in the result after all of its dependencies are resolved.
+It’s a common algorithm used in build systems, task schedulers, and dependency resolution tools.
+
+```js
+const cards = [
+  { id: 1, dependent: [6, 7, 8] },
+  { id: 2, dependent: [6] },
+  { id: 3, dependent: [] },
+  { id: 4, dependent: [6, 7, 8] },
+  { id: 5, dependent: [6, 8] },
+  { id: 6, dependent: [] },
+  { id: 7, dependent: [6] },
+  { id: 8, dependent: [7] },
+  { id: 9, dependent: [1] },
+  { id: 10, dependent: [9] },
+];
+
+const getOrderedCards = (cards) => {
+  const result = [];
+  const added = new Set();
+
+  while (result.length < cards.length) {
+    for (const card of cards) {
+      if (
+        !added.has(card.id) &&
+        card.dependent.every((dep) => added.has(dep))
+      ) {
+        result.push(card.id);
+        added.add(card.id);
+      }
+    }
+  }
+
+  return result;
+};
+
+console.log(getOrderedCards(cards));
+// [
+//   3, 6, 7, 8,  1,
+//   2, 4, 5, 9, 10
+// ]
+```

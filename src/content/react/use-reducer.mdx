@@ -1,0 +1,91 @@
+
+## useReducer
+
+The `useReducer` hook is a more advanced alternative to `useState` for managing complex state logic in React.
+It allows you to handle state transitions using a reducer function, similar to how Redux works. `useReducer`
+is especially useful when the state depends on previous state values or involves more complex state updates.
+
+In this example, `useReducer` is used to manage a collection of messages. The `messengerReducer` function defines
+the logic for adding and removing messages. The reducer receives the current state and an action, then returns the updated state based on the action type.
+
+The `useReducer` hook returns the current state and a dispatch function to trigger state updates. The state is updated
+when a button is clicked, either to add a new message or remove the last message.
+
+```tsx filename="useReducer" copy
+import { useState } from "react";
+
+type Messages = Record<number, string>;
+
+type Action =
+  | { type: "add_message"; message: string }
+  | { type: "remove_last_message" };
+
+const initialState: Messages = {
+  0: "Hello, Taylor",
+  1: "Hello, Alice",
+  2: "Hello, Bob",
+};
+
+function useReducer<S, A>(
+  reducer: (state: S, action: A) => S,
+  initialState: S,
+): [S, (action: A) => void] {
+  const [state, setState] = useState<S>(initialState);
+
+  function dispatch(action: A) {
+    const nextState = reducer(state, action);
+    setState(nextState);
+  }
+
+  return [state, dispatch];
+}
+
+function messengerReducer(state: Messages, action: Action): Messages {
+  switch (action.type) {
+    case "add_message": {
+      const nextId = Math.max(0, ...Object.keys(state).map(Number)) + 1;
+      return {
+        ...state,
+        [nextId]: action.message,
+      };
+    }
+    case "remove_last_message": {
+      const ids = Object.keys(state).map(Number);
+      if (ids.length === 0) return state;
+      const lastId = Math.max(...ids);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [lastId]: _, ...rest } = state;
+      return rest;
+    }
+    default:
+      throw new Error("Unknown action: " + (action as Action).type);
+  }
+}
+
+export default function App() {
+  const [messages, dispatch] = useReducer<Messages, Action>(
+    messengerReducer,
+    initialState,
+  );
+
+  return (
+    <div>
+      <ul>
+        {Object.entries(messages).map(([id, message]) => (
+          <li key={id}>{message}</li>
+        ))}
+      </ul>
+      <button
+        onClick={() =>
+          dispatch({ type: "add_message", message: "New Message" })
+        }
+      >
+        Add Message
+      </button>
+      <button onClick={() => dispatch({ type: "remove_last_message" })}>
+        Remove Last Message
+      </button>
+    </div>
+  );
+}
+```

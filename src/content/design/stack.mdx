@@ -1,0 +1,72 @@
+
+## Stack Palindrome
+
+This function uses a **stack** to check if a given word is a palindrome. It pushes each character onto the stack, then pops them in reverse order to compare with the original string.
+
+```js filename="stack palindrome" copy
+function isPalindrome(word) {
+  const letters = []; // this is our stack
+  let reversedWord = "";
+
+  // put letters of word into stack
+  for (let i = 0; i < word.length; i++) {
+    letters.push(word[i]);
+  }
+
+  // pop off the stack in reverse order
+  for (let i = 0; i < word.length; i++) {
+    reversedWord += letters.pop();
+  }
+
+  return reversedWord === word;
+}
+
+console.log(isPalindrome("racecar")); // true
+console.log(isPalindrome("cheatsheet")); // false
+```
+
+## Stack
+
+A basic `Stack` class implementation that follows **LIFO (Last In, First Out)** behavior.
+Includes common methods such as `push`, `pop`, `peek`, and `size`.
+
+Useful for:
+- Undo functionality
+- Recursion
+- Reversing data
+
+```js filename="stack" copy
+class Stack {
+  constructor() {
+    this.storage = [];
+  }
+
+  push(value) {
+    this.storage.push(value);
+    return this;
+  }
+
+  pop() {
+    this.storage.pop();
+    return this;
+  }
+
+  size() {
+    return this.storage.length;
+  }
+
+  peek() {
+    return this.storage[this.storage.length - 1];
+  }
+}
+
+const myStack = new Stack();
+
+myStack.push(1).push(2).push(3);
+console.log(myStack.peek()); // 3
+myStack.pop();
+console.log(myStack.peek()); // 2
+myStack.push("js-cheatsheet");
+console.log(myStack.size()); // 3
+console.log(myStack.peek()); // js-cheatsheet
+```

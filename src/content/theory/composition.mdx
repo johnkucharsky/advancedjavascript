@@ -1,0 +1,101 @@
+
+## composition
+
+Composition vs Inheritance
+People sometimes say “composition” when contrasting it with inheritance.
+This has less to do with functions (which we’ve been discussing all along)
+and more to do with objects and classes — that is, with traditional
+object-oriented programming.
+
+In particular, if you express your code as classes, it is tempting to reuse
+behavior from another class by extending it (inheritance). However, this
+makes it somewhat difficult to adjust the behavior later. For example, you
+may want to similarly reuse behavior from another class, but you can’t
+extend more than one base class.
+
+Sometimes, people say that inheritance “locks you into” your first design
+because the cost of changing the class hierarchy later is too high. When
+people suggest composition is an alternative to inheritance, they mean that
+instead of extending a class, you can keep an instance of that class as a field.
+Then you can “delegate” to that instance when necessary, but you are also free
+to do something different.
+
+Function composition is a powerful concept, but it raises the level of abstraction
+and makes your code less direct. If you write your code in a style that composes
+functions in some way before calling them, and there are other humans on your team,
+make sure that you’re getting concrete benefits from this approach. It is not “cleaner”
+or “better”, and there is a price to pay for “beautiful” but indirect code.
+
+[composition article](https://whatthefuck.is/composition)
+
+```js filename="composition" copy
+const dateFunc = () => new Date();
+const textFunc = (date) => date.toDateString();
+const labelFunc = (text) => `Today ${text}`;
+const showLabelFunc = (label) => console.log(label);
+
+const date = dateFunc();
+const text = textFunc(date);
+const label = labelFunc(text);
+showLabelFunc(label); // Today Sat Sep 28 2024
+
+function pipe(...steps) {
+  return function runSteps() {
+    let result;
+    for (let i = 0; i < steps.length; i++) {
+      let step = steps[i];
+      result = step(result);
+    }
+    return result;
+  };
+}
+
+const showDateLabel = pipe(dateFunc, textFunc, labelFunc, showLabelFunc);
+showDateLabel(); // Today Sat Sep 28 2024
+```
+
+### inheritance
+
+```typescript
+// Base class
+class Vehicle {
+  private readonly _make: string;
+  private readonly _model: string;
+  private readonly _year: number;
+
+  constructor(make: string, model: string, year: number) {
+    this._make = make;
+    this._model = model;
+    this._year = year;
+  }
+
+  displayInfo(): string {
+    return `${this._year} ${this._make} ${this._model}`;
+  }
+}
+
+// Derived class
+class Car extends Vehicle {
+  private readonly _doors: number;
+
+  constructor(
+    make: string,
+    model: string,
+    year: number,
+    doors: number,
+  ) {
+    super(make, model, year); // Call the constructor of the base class
+    this._doors = doors;
+  }
+
+  displayInfo(): string {
+    return `${super.displayInfo()} - ${this._doors} doors`;
+  }
+}
+
+const vehicle = new Vehicle("Toyota", "Corolla", 2020);
+console.log(vehicle.displayInfo()); // 2020 Toyota Corolla
+
+const car = new Car("Honda", "Civic", 2022, 4);
+console.log(car.displayInfo()); // 2022 Honda Civic - 4 doors
+```

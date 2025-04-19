@@ -1,0 +1,41 @@
+## filter
+
+The [`filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+method creates a **shallow copy** of an array, including only elements that pass the test implemented by the provided callback function.
+It’s ideal for narrowing down data based on conditions, like filtering by length, type, or custom logic.
+
+This example includes a custom implementation of `Array.prototype.filter()` and practical use cases like filtering long words or prime numbers.
+
+```js filename="filter" copy
+Array.prototype.myFilter = function (callback) {
+  const result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    if (callback(this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+
+  return result;
+};
+
+const words = ["spray", "elite", "exuberant", "destruction", "present"];
+
+const result = words.myFilter((word) => word.length > 6);
+
+console.log(result);
+// ["exuberant", "destruction", "present"]
+
+const array = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+function isPrime(num) {
+  for (let i = 2; num > i; i++) {
+    if (num % i === 0) {
+      return false;
+    }
+  }
+  return num > 1;
+}
+
+console.log(array.myFilter(isPrime)); // [ 2, 3, 5, 7 ]
+```

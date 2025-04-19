@@ -1,0 +1,299 @@
+
+## dictionary of nested arrays
+
+This example demonstrates how to transform a deeply nested array structure (e.g., categories → subcategories → items)
+into a dictionary (object-based) format for **fast lookup** by `id`.
+
+### Benefits:
+- Constant-time access to categories, subcategories, and items by their `id`.
+- Improves performance for large datasets with frequent lookups.
+- Easy to traverse and mutate without relying on nested `find()` calls.
+
+### Approaches Covered:
+- **Plain JS implementation** using nested loops to assign items into objects keyed by `id`.
+- **Recursive `mapToDictionary` utility** that supports arbitrary nesting levels via a `keys` argument.
+- **TypeScript** version with strict typing and reusable helper functions for building deeply nested dictionaries.
+
+Great for building normalized state for UIs, lookup tables, or improving nested data traversal.
+
+```js filename="dictionary of nested" copy
+const data = [
+  {
+    id: 1,
+    name: "Category A",
+    items: [
+      {
+        id: 2,
+        name: "Subcategory A1",
+        items: [
+          { id: 3, name: "Item A1-1", value: 10 },
+          { id: 4, name: "Item A1-2", value: 15 },
+        ],
+      },
+      {
+        id: 5,
+        name: "Subcategory A2",
+        items: [
+          { id: 6, name: "Item A2-1", value: 20 },
+          { id: 7, name: "Item A2-2", value: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 8,
+    name: "Category B",
+    items: [
+      {
+        id: 9,
+        name: "Subcategory B1",
+        items: [
+          { id: 10, name: "Item B1-1", value: 30 },
+          { id: 11, name: "Item B1-2", value: 35 },
+        ],
+      },
+      {
+        id: 12,
+        name: "Subcategory B2",
+        items: [
+          { id: 13, name: "Item B2-1", value: 40 },
+          { id: 14, name: "Item B2-2", value: 45 },
+        ],
+      },
+    ],
+  },
+];
+
+function createNestedDictionary(data) {
+  const dictionary = {};
+
+  for (const category of data) {
+    dictionary[category.id] = { ...category, subcategories: {} };
+
+    for (const subcategory of category.items) {
+      dictionary[category.id].subcategories[subcategory.id] = {
+        ...subcategory,
+        items: {},
+      };
+
+      for (const item of subcategory.items) {
+        dictionary[category.id].subcategories[subcategory.id].items[item.id] =
+          item;
+      }
+    }
+  }
+
+  return dictionary;
+}
+
+const nestedDictionary = createNestedDictionary(data);
+
+console.log(nestedDictionary[1].name); // Category A
+console.log(nestedDictionary[1].subcategories[5].name); // Subcategory A2
+console.log(nestedDictionary[1].subcategories[5].items[7].name); // Item A2-2
+console.log(nestedDictionary[8].subcategories[12].items[14]);
+// { id: 14, name: 'Item B2-2', value: 45 }
+```
+
+```js filename="dictionary of nested" copy
+const data = [
+  {
+    id: 1,
+    name: "Category A",
+    items: [
+      {
+        id: 2,
+        name: "Subcategory A1",
+        items: [
+          { id: 3, name: "Item A1-1", value: 10 },
+          { id: 4, name: "Item A1-2", value: 15 },
+        ],
+      },
+      {
+        id: 5,
+        name: "Subcategory A2",
+        items: [
+          { id: 6, name: "Item A2-1", value: 20 },
+          { id: 7, name: "Item A2-2", value: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 8,
+    name: "Category B",
+    items: [
+      {
+        id: 9,
+        name: "Subcategory B1",
+        items: [
+          { id: 10, name: "Item B1-1", value: 30 },
+          { id: 11, name: "Item B1-2", value: 35 },
+        ],
+      },
+      {
+        id: 12,
+        name: "Subcategory B2",
+        items: [
+          { id: 13, name: "Item B2-1", value: 40 },
+          { id: 14, name: "Item B2-2", value: 45 },
+        ],
+      },
+    ],
+  },
+];
+
+function mapToDictionary(data, keys) {
+  const [currentKey, ...remainingKeys] = keys;
+
+  return data.reduce((acc, item) => {
+    acc[item.id] = {
+      ...item,
+      [currentKey || "items"]: item.items
+        ? mapToDictionary(item.items, remainingKeys)
+        : undefined,
+    };
+    return acc;
+  }, {});
+}
+
+const nestedDictionary = mapToDictionary(data, ["subcategories", "items"]);
+
+console.log(nestedDictionary[1].name); // Category A
+console.log(nestedDictionary[1].subcategories[5].name); // Subcategory A2
+console.log(nestedDictionary[1].subcategories[5].items[7].name); // Item A2-2
+console.log(nestedDictionary[8].subcategories[9].items[11]);
+// { id: 11, name: 'Item B1-2', value: 35, items: undefined }
+```
+
+### typescript
+
+```ts filename="dictionary of nested ts" copy
+type Item = {
+  id: number;
+  name: string;
+  value: number;
+};
+
+type Subcategory = {
+  id: number;
+  name: string;
+  items: Item[];
+};
+
+type Category = {
+  id: number;
+  name: string;
+  items: Subcategory[];
+};
+
+type Subcategories = Record<
+  number,
+  {
+    name: string;
+    items: Record<number, Item>;
+  }
+>;
+
+type NestedDictionary = Record<
+  number,
+  {
+    name: string;
+    subcategories: Subcategories;
+  }
+>;
+
+function mapItemsToDictionary(items: Item[]) {
+  return items.reduce(
+    (acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    },
+    {} as Record<number, Item>,
+  );
+}
+
+function mapSubcategoriesToDictionary(
+  subcategories: Subcategory[],
+) {
+  return subcategories.reduce((acc, subcategory) => {
+    acc[subcategory.id] = {
+      name: subcategory.name,
+      items: mapItemsToDictionary(subcategory.items),
+    };
+    return acc;
+  }, {} as Subcategories);
+}
+
+function createNestedDictionary(
+  categories: Category[],
+): NestedDictionary {
+  return categories.reduce((acc, category) => {
+    acc[category.id] = {
+      name: category.name,
+      subcategories: mapSubcategoriesToDictionary(
+        category.items,
+      ),
+    };
+    return acc;
+  }, {} as NestedDictionary);
+}
+
+const data: Category[] = [
+  {
+    id: 1,
+    name: "Category A",
+    items: [
+      {
+        id: 2,
+        name: "Subcategory A1",
+        items: [
+          { id: 3, name: "Item A1-1", value: 10 },
+          { id: 4, name: "Item A1-2", value: 15 },
+        ],
+      },
+      {
+        id: 5,
+        name: "Subcategory A2",
+        items: [
+          { id: 6, name: "Item A2-1", value: 20 },
+          { id: 7, name: "Item A2-2", value: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 8,
+    name: "Category B",
+    items: [
+      {
+        id: 9,
+        name: "Subcategory B1",
+        items: [
+          { id: 10, name: "Item B1-1", value: 30 },
+          { id: 11, name: "Item B1-2", value: 35 },
+        ],
+      },
+      {
+        id: 12,
+        name: "Subcategory B2",
+        items: [
+          { id: 13, name: "Item B2-1", value: 40 },
+          { id: 14, name: "Item B2-2", value: 45 },
+        ],
+      },
+    ],
+  },
+];
+
+const nestedDictionary = createNestedDictionary(data);
+
+console.log(nestedDictionary[1].name); // Category A
+console.log(nestedDictionary[1].subcategories[5].name); // Subcategory A2
+console.log(
+  nestedDictionary[1].subcategories[5].items[7].name,
+); // Item A2-2
+console.log(
+  nestedDictionary[8].subcategories[12].items[14].value,
+); // 45
+```

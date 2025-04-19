@@ -1,0 +1,27 @@
+
+## pop
+
+The [`pop()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop)
+method removes the **last element** from an array and returns it. It mutates the original array by reducing its length by one.
+
+This example provides a custom implementation of `Array.prototype.pop()` that replicates native behavior.
+
+```js filename="pop" copy
+Array.prototype.customPop = function () {
+  const length = this.length;
+
+  if (length === 0) {
+    return undefined;
+  }
+
+  const lastElement = this[length - 1];
+  this.length = length - 1;
+
+  return lastElement;
+};
+
+const fruits = ["Apple", "Banana", "Cherry"];
+const lastFruit = fruits.customPop();
+console.log(lastFruit); // Cherry
+console.log(fruits); // [ "Apple", "Banana" ]
+```

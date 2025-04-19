@@ -1,0 +1,53 @@
+
+## this
+
+Below `users.customFilterNoThis(army.canJoin)`, throws, `army.canJoin` was called
+as a standalone function, with `this=undefined`, thus leading to an instant error.
+A call to `users.customFilter(army.canJoin, army)` can be replaced with
+`users.customFilterNoThis(user => army.canJoin(user))`, that does the same.
+This is an object before dot
+
+```js filename="this" copy
+Array.prototype.customFilter = function (callback, thisArg) {
+  let result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    if (callback.call(thisArg, this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+
+  return result;
+};
+
+Array.prototype.customFilterNoThis = function (callback) {
+  let result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    if (callback(this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+
+  return result;
+};
+
+const army = {
+  minAge: 18,
+  maxAge: 27,
+  canJoin(user) {
+    return user.age >= this.minAge && user.age < this.maxAge;
+  },
+};
+
+const users = [{ age: 16 }, { age: 20 }, { age: 23 }, { age: 30 }];
+
+const soldiers1 = users.customFilterNoThis(army.canJoin);
+// return user.age >= this.minAge && user.age < this.maxAge;
+// TypeError: Cannot read properties of undefined (reading 'minAge')
+const soldiers2 = users.customFilterNoThis((user) => army.canJoin(user));
+const soldiers3 = users.customFilter(army.canJoin, army);
+
+console.log(soldiers2); // [ { age: 20 }, { age: 23 } ]
+console.log(soldiers3); // [ { age: 20 }, { age: 23 } ]
+```

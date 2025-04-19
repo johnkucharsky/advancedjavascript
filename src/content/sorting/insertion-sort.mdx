@@ -1,0 +1,37 @@
+
+## insertion sort
+
+The [`insertionSort()`](https://www.w3schools.com/dsa/dsa_algo_insertionsort.php) function sorts an array by
+repeatedly picking the next element and inserting it into the correct position within the already sorted portion of the array.
+It builds the sorted array one item at a time by comparing the current item to the previous ones.
+
+This custom implementation demonstrates the insertion sort algorithm. For each element, it is compared to the previous ones and
+inserted into the correct position, shifting elements as necessary.
+
+```js filename="intersection sort" copy
+function insertionSort(array) {
+  const n = array.length;
+
+  for (let i = 1; i < n; i++) {
+    let insertIndex = i;
+    const currentValue = array[i];
+
+    for (let j = i - 1; j >= 0; j--) {
+      if (array[j] > currentValue) {
+        array[j + 1] = array[j];
+        insertIndex = j;
+      } else {
+        break;
+      }
+    }
+
+    array[insertIndex] = currentValue;
+  }
+  return array;
+}
+
+const myArray = [64, 34, 25, 12, 22, 11, 90, 5];
+const sortedArray = insertionSort(myArray);
+console.log(sortedArray);
+// [ 5, 11, 12, 22, 25, 34, 64, 90 ]
+```

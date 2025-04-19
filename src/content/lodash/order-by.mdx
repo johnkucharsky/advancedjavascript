@@ -1,0 +1,43 @@
+
+## orderBy
+
+The [`_.orderBy()`](https://lodash.com/docs/4.17.15#orderBy) method sorts an array of objects based on
+one or more properties. You can specify the sort order for each property as either ascending (`"asc"`) or descending (`"desc"`).
+
+This custom implementation replicates the `_.orderBy()` method by accepting an array, a property to sort by, and
+an optional order parameter (`"asc"` by default). The array is first copied to avoid mutation, then sorted based on the specified property and order.
+
+```js filename="orderBy" copy
+function orderBy(array, property, order = "asc") {
+  const multiplier = order === "asc" ? 1 : -1;
+  const copy = [...array];
+
+  return copy.sort((a, b) => {
+    if (a[property] < b[property]) return -1 * multiplier;
+    if (a[property] > b[property]) return 1 * multiplier;
+    return 0;
+  });
+}
+
+const users = [
+  { user: "barney", age: 36 },
+  { user: "fred", age: 40 },
+  { user: "pebbles", age: 1 },
+];
+
+const sortedByAgeAsc = orderBy(users, "age", "asc");
+console.log(sortedByAgeAsc);
+// [
+//   { user: 'pebbles', age: 1 },
+//   { user: 'barney', age: 36 },
+//   { user: 'fred', age: 40 }
+// ]
+
+const sortedByUserDesc = orderBy(users, "user", "desc");
+console.log(sortedByUserDesc);
+// [
+//   { user: 'pebbles', age: 1 },
+//   { user: 'fred', age: 40 },
+//   { user: 'barney', age: 36 }
+// ]
+```

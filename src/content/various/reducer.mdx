@@ -1,0 +1,56 @@
+
+## Reducer pattern with actions
+
+This example demonstrates the use of a reducer function similar to the pattern used in React’s `useReducer`.
+The reducer function handles different types of actions (`added`, `changed`, `deleted`) to manage a list of tasks.
+It accumulates state changes over time as actions are applied via
+[`Array.prototype.reduce`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce),
+making it a powerful pattern for predictable state updates in complex logic flows.
+
+```js filename="reducer" copy
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case "added": {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case "changed": {
+      return tasks.map((t) => {
+        if (t.id === action.id) {
+          const { type, ...actionNoType } = action;
+          return actionNoType;
+        } else {
+          return t;
+        }
+      });
+    }
+    case "deleted": {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error("Unknown action: " + action.type);
+    }
+  }
+}
+
+const initialState = [];
+const actions = [
+  { type: "added", id: 1, text: "Visit Kafka Museum" },
+  { type: "added", id: 2, text: "Watch a puppet show" },
+  { type: "deleted", id: 1 },
+  { type: "added", id: 3, text: "Lennon Wall pic" },
+  { type: "changed", id: 3, text: "Lennon Wall", done: true },
+];
+const finalState = actions.reduce(tasksReducer, initialState);
+console.log(finalState);
+// [
+//     { id: 2, text: 'Watch a puppet show', done: false },
+//     { id: 3, text: 'Lennon Wall', done: true }
+// ]
+```

@@ -1,0 +1,359 @@
+
+## Object Methods
+
+This collection of examples explores how `this` behaves in different contexts: regular functions, arrow functions, method calls, class constructors, and asynchronous functions like `setTimeout`.
+
+It covers:
+- Method binding issues when referencing `this`
+- The difference between arrow functions and regular methods
+- Preserving `this` in callbacks
+- Returning `this` for method chaining
+- Context behavior in `class` methods and prototype chains
+
+Understanding these patterns is essential for working with objects, classes, and asynchronous code in JavaScript.
+
+[object-methods](https://javascript.info/object-methods)
+
+```js copy
+let user = {
+  name: "John",
+  age: 30,
+
+  sayHi() {
+    console.log(user.name); // leads to an error
+  },
+};
+
+const admin = user;
+user = null; // overwrite user object
+
+try {
+  admin.sayHi();
+} catch (e) {
+  console.error(e.message);
+}
+// Cannot read properties of null (reading 'name')
+
+console.log(admin);
+// { name: 'John', age: 30, sayHi: [Function: sayHi] }
+```
+
+### ❌ Accessing `user` directly inside a method
+
+Avoid directly referencing the object (`user`) inside its own method.
+If the object is reassigned or removed, the method will throw an error. Use `this` instead to safely access object properties.
+
+```js copy
+let user = {
+  name: "John",
+  age: 30,
+
+  sayHi() {
+    console.log(this.name);
+  },
+};
+
+const admin = user;
+user = null; // overwrite user object
+
+try {
+  admin.sayHi();
+} catch (e) {
+  console.error(e.message);
+}
+// John
+
+console.log(admin);
+// { name: 'John', age: 30, sayHi: [Function: sayHi] }
+```
+
+### 🔄 Arrow vs Regular Function and `this`
+
+Arrow functions don’t have their own `this` — they inherit it from the surrounding scope.
+In contrast, regular functions define their own `this`, which can lead to unexpected `undefined` values when used as methods.
+
+```js copy
+const user = {
+  firstName: "John",
+  sayHi() {
+    const arrow = () => console.log(this.firstName);
+    arrow();
+  },
+};
+user.sayHi(); // John
+
+const user2 = {
+  firstName: "John",
+  sayHi() {
+    function normal() {
+      console.log(this.firstName);
+    }
+    normal();
+  },
+};
+user2.sayHi(); // undefined
+```
+
+### ⚠️ `this` in object literals vs methods
+
+When returning an object from a function, `this` does not refer to the object being created — it refers to the function's execution context.
+To correctly reference the object itself, define `ref` as a method so that `this` is bound to the object at call time.
+
+```js copy
+function makeUser() {
+  return {
+    name: "John",
+    ref: this,
+  };
+}
+const user = makeUser();
+console.log(user.ref.name); // undefined
+
+// The value of this is one for the whole function
+// ... same as
+function makeUser2() {
+  return this; // this time there's no object literal
+}
+console.log(makeUser2().name); // undefined
+
+function makeUser3() {
+  return {
+    name: "John",
+    ref() {
+      return this;
+    },
+  };
+}
+
+const user2 = makeUser3();
+
+console.log(user2.ref().name); // John
+
+// Now it works, because user2.ref() is a method.
+// And the value of this is set to the object before dot
+```
+
+### 🪜 Method Chaining with `this`
+
+By returning `this` from each method, you enable **method chaining** — a clean and expressive way to perform multiple operations on the same object in sequence.
+
+```js copy
+const ladder = {
+  step: 0,
+  up() {
+    this.step++;
+    return this;
+  },
+  down() {
+    this.step--;
+    return this;
+  },
+  showStep: function () {
+    // shows the current step
+    console.log(this.step);
+    return this;
+  },
+};
+
+ladder.up();
+ladder.up();
+ladder.down();
+ladder.showStep(); // 1
+ladder.down();
+ladder.showStep(); // 0
+
+ladder.up().up().down().showStep().down().showStep();
+// shows 1 then 0
+```
+
+### 🔍 `this` in Regular vs Arrow Methods
+
+Regular functions bind `this` to the object they belong to, while arrow functions inherit `this`
+from the outer scope — which may lead to unexpected `undefined` or `NaN` values when used as methods.
+
+```js copy
+const obj1 = {
+  value: 5,
+  regularMethod: function () {
+    return this?.value + 10;
+  },
+  arrowMethod: () => {
+    return this?.value + 20;
+  },
+};
+
+console.log(obj1.regularMethod()); // 15
+console.log(obj1.arrowMethod()); // NaN
+```
+
+### ⏱️ Preserving `this` in Async Callbacks
+
+In asynchronous functions like `setTimeout`, regular functions lose their `this` binding.
+Arrow functions capture `this` from their lexical scope, making them ideal for preserving context in async callbacks.
+
+```js copy
+const obj2 = {
+  value: 50,
+  method: function () {
+    setTimeout(function () {
+      console.log(this.value);
+    }, 100);
+  },
+  methodArrow: function () {
+    setTimeout(() => {
+      console.log(this.value);
+    }, 100);
+  },
+};
+obj2.method(); // undefined
+obj2.methodArrow(); // 50
+```
+
+### 🎯 Arrow Functions Preserve Context
+
+Arrow functions retain the `this` value from where they were defined.
+Even when the method is detached from the object, it still correctly references `this.value` from its original context.
+
+```js copy
+function Example() {
+  this.value = 30;
+  this.arrowMethod = () => {
+    console.log(this.value);
+  };
+}
+
+const example1 = new Example();
+example1.arrowMethod(); // 30
+
+const detachedMethod = example1.arrowMethod;
+detachedMethod(); // 30
+```
+
+### ⚠️ Regular Functions Lose `this` When Detached
+
+Regular functions bind `this` dynamically at call time.
+When a method is called standalone (detached from its object),
+`this` becomes `undefined` (in strict mode), leading to unexpected behavior.
+
+```js copy
+function Example() {
+  this.value = 30;
+  this.regularMethod = function () {
+    console.log(this);
+  };
+}
+
+const example1 = new Example();
+example1.regularMethod();
+// Example { value: 30, regularMethod: [Function (anonymous)] }
+
+const detachedMethod = example1.regularMethod;
+detachedMethod(); // undefined
+```
+
+### 🧭 `call` with Regular vs Arrow Functions
+
+Regular functions can have their `this` explicitly set using `.call()`.
+Arrow functions, however, do not bind `this` and always inherit it from the
+surrounding scope — making `.call()` ineffective.
+
+```js copy
+const obj5 = {
+  value: 25,
+  regularMethod: function () {
+    return this.value;
+  },
+  arrowMethod: () => {
+    return this;
+  },
+};
+
+const anotherObj = {
+  value: 50,
+};
+
+console.log(obj5.regularMethod()); // 25
+console.log(obj5.regularMethod.call(anotherObj)); // 50
+console.log(obj5.arrowMethod()); // undefined
+console.log(obj5.arrowMethod.call(anotherObj)); // undefined
+```
+
+### 🔄 Arrow Function Captures Outer `this`
+
+When an arrow function is returned from a method, it keeps the `this` of its surrounding context — in this case, the `obj7` object.
+This allows the inner function to access `obj7.value` even when returned from another object.
+
+```js copy
+const obj = {
+  value: 70,
+  method: function () {
+    return {
+      getValue: () => {
+        return this.value;
+      },
+    };
+  },
+};
+
+const innerObj = obj.method();
+console.log(innerObj.getValue()); // 70
+```
+
+### 🧩 `this` in Class Methods: Regular vs Arrow
+
+In class instances, regular methods lose `this` when detached, while arrow functions preserve the class context.
+Arrow methods defined as properties are especially useful when passing methods as callbacks or event handlers.
+
+```js copy
+class MyClass {
+  value;
+
+  constructor() {
+    this.value = 40;
+  }
+
+  regularMethod() {
+    console.log(this);
+  }
+
+  arrowMethod = () => {
+    console.log(this);
+  };
+}
+
+const instance = new MyClass();
+
+instance.regularMethod();
+// MyClass { value: 40, arrowMethod: [Function: arrowMethod] }
+instance.arrowMethod();
+// MyClass { value: 40, arrowMethod: [Function: arrowMethod] }
+
+const regularFn = instance.regularMethod;
+const arrowFn = instance.arrowMethod;
+
+regularFn(); // undefined
+arrowFn();
+// MyClass { value: 40, arrowMethod: [Function: arrowMethod] }
+```
+
+### 🚗 Inheriting Methods with `Object.create`
+
+Using `Object.create()`, you can create an object that inherits from another.
+Here, `myCar` inherits the `getInfo` method from `vehicle`, demonstrating how prototype-based inheritance works in JavaScript.
+
+```js copy
+const vehicle = {
+  getInfo: function () {
+    console.log(this.model + " was made in " + this.year);
+  },
+};
+
+const myCar = Object.create(vehicle);
+myCar.model = "BMW";
+myCar.year = 2010;
+myCar.getInfo(); // BMW was made in 2010
+console.log(myCar);
+// { model: 'BMW', year: 2010 }
+console.log(myCar.__proto__);
+// { getInfo: [Function: getInfo] }
+```

@@ -1,0 +1,32 @@
+## every
+
+The [`every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every)
+method tests whether **all elements** in an array pass the test implemented by the provided callback.
+It returns a **boolean** — `true` if all elements satisfy the condition, and `false` otherwise.
+
+This example includes a custom implementation of `Array.prototype.every()` and shows how it can be used for subset checks.
+
+```js filename="every" copy
+Array.prototype.customEvery = function (callback) {
+  for (let i = 0; i < this.length; i++) {
+    if (!callback(this[i], i)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const arr = [1, 30, 39, 29, 10, 13];
+
+console.log(arr.customEvery((currentValue) => currentValue > 40));
+// false
+console.log(arr.customEvery((currentValue) => currentValue < 40));
+// true
+
+const isSubset = (array1, array2) =>
+  array2.customEvery((element) => array1.includes(element));
+
+console.log(isSubset([1, 2, 3, 4, 5, 6, 7], [5, 7, 6])); // true
+console.log(isSubset([1, 2, 3, 4, 5, 6, 7], [5, 8, 7])); // false
+```

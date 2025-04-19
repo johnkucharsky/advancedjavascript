@@ -1,0 +1,22 @@
+
+## Shuffle (Fisher-Yates Algorithm)
+
+This example implements the [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher–Yates_shuffle),
+a reliable way to randomly shuffle elements in an array.
+The algorithm works by iterating the array from the end to the beginning,
+swapping the current element with a randomly selected one from earlier in the array (or itself).
+It ensures a uniform distribution of permutations.
+
+```js
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+const shuffledArray = [1, 2, 3, 4, 5];
+shuffle(shuffledArray);
+console.log(shuffledArray); // [ 2, 1, 4, 5, 3 ]
+```

@@ -1,0 +1,31 @@
+
+## shift
+
+The [`shift()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift)
+method removes the **first element** from an array and returns it,
+shifting the remaining elements down. This method mutates the array by reducing its length.
+
+This custom implementation of `Array.prototype.shift()` manually shifts the array elements and returns the removed first element.
+
+```js filename="shift" copy
+Array.prototype.customShift = function () {
+  if (!this.length) return;
+
+  const firstElement = this[0];
+
+  for (let i = 0; i < this.length; i++) {
+    this[i] = this[i + 1];
+  }
+
+  this.length -= 1;
+
+  return firstElement;
+};
+
+const array1 = [1, 2, 3];
+
+const firstElement = array1.customShift();
+
+console.log(array1); // [2, 3]
+console.log(firstElement); // 1
+```

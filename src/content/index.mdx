@@ -1,14 +1,50 @@
-import { Bleed } from 'nextra/components'
-
 # Introduction
 
-**Nextra** is a [Next.js](https://nextjs.org) based static site generator.
+**Advanced JavaScript** is a collection of essential concepts demonstrated through concise code snippets.
 
-It supports Markdown and React components ([MDX](/features/mdx)), automatically
-generated [sidebar and anchor links](/get-started#sidebar-and-anchor-links),
-file-system based routing, built-in syntax highlighting, image optimization,
-custom layouts, i18n, and all the features you love about Next.js.
+I'm a frontend developer. I had about 20 interviews — and I gathered everything companies were asking me.
+All snippets are based on those real-world questions.
 
-Here's what you will get in 1 minute:
+You can copy any snippet, paste it into your browser’s DevTools, and step through it with a debugger to truly understand what’s happening.
 
-<Bleed>![Nextra Example](/demo.png)</Bleed>
+What will this print?
+
+```js filename="Promise Resolution Order" copy
+const promise1 = Promise.resolve();
+const promise2 = Promise.resolve();
+
+promise1.then(() => console.log(1)).then(() => console.log(2));
+promise2.then(() => console.log(3)).then(() => console.log(4));
+```
+
+And how about this?
+
+```js filename="Event Loop" copy
+console.log("1");
+
+setTimeout(function () {
+  console.log("2");
+
+  Promise.resolve().then(function () {
+    console.log("3");
+  });
+}, 0);
+
+Promise.resolve().then(function () {
+  console.log("4");
+
+  setTimeout(function () {
+    console.log("5");
+  }, 0);
+});
+
+requestAnimationFrame(function () {
+  console.log("7");
+});
+
+console.log("6");
+```
+
+[Event Loop](/learn-js-and-mdn/event-loop)
+
+Let’s dive in 👇

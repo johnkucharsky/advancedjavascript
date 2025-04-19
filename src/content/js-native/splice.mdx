@@ -1,0 +1,121 @@
+
+## splice
+
+The [`splice()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice)
+method changes the contents of an array by **removing or replacing** existing elements and/or adding new elements in place.
+
+This custom implementation of `Array.prototype.splice()` handles negative indices, normalization of `deleteCount`,
+and array modification in place, while returning the removed elements.
+
+```js filename="splice" copy
+Array.prototype.customSplice = function (
+  startIndex,
+  deleteCount,
+  ...itemsToAdd
+) {
+  const length = this.length;
+
+  // Handle negative indices
+  startIndex =
+    startIndex < 0
+      ? Math.max(length + startIndex, 0)
+      : Math.min(startIndex, length);
+
+  // If deleteCount is undefined, remove all elements starting from startIndex
+  if (deleteCount === undefined) {
+    deleteCount = length - startIndex;
+  } else {
+    // Normalize deleteCount
+    deleteCount = Math.max(0, Math.min(deleteCount, length - startIndex));
+  }
+
+  // Extract the array to be deleted
+  const splicedItems = this.slice(startIndex, startIndex + deleteCount);
+
+  // Create the resulting this by combining parts and items to add
+  const remainingItems = [
+    ...this.slice(0, startIndex),
+    ...itemsToAdd,
+    ...this.slice(startIndex + deleteCount),
+  ];
+
+  // Update the original array
+  this.length = 0; // Clear the this
+  for (let i = 0; i < remainingItems.length; i++) {
+    this[i] = remainingItems[i];
+  }
+
+  // Return the deleted items
+  return splicedItems;
+};
+
+// Remove 0 (zero) elements before index 2, and insert "drum"
+const myFish = ["angel", "clown", "mandarin", "sturgeon"];
+const removed = myFish.customSplice(2, 0, "drum");
+console.log({ myFish, removed });
+// myFish: [ 'angel', 'clown', 'drum', 'mandarin', 'sturgeon' ]
+// removed: []
+
+// Remove 0 (zero) elements before index 2, and insert "drum" and "guitar"
+const myFish1 = ["angel", "clown", "mandarin", "sturgeon"];
+const removed1 = myFish1.customSplice(2, 0, "drum", "guitar");
+console.log({ myFish1, removed1 });
+// myFish1: [ 'angel', 'clown', 'drum', 'guitar', 'mandarin', 'sturgeon' ],
+// removed1: []
+
+// Remove 0 (zero) elements at index 0, and insert "angel"
+// splice(0, 0, ...elements) inserts elements at the start of
+// the array like unshift().
+const myFish2 = ["clown", "mandarin", "sturgeon"];
+const removed2 = myFish2.customSplice(0, 0, "angel");
+console.log({ myFish2, removed2 });
+// myFish2: [ 'angel', 'clown', 'mandarin', 'sturgeon' ], removed2: []
+
+// Remove 0 (zero) elements at last index, and insert "sturgeon"
+// splice(array.length, 0, ...elements) inserts elements at the
+// end of the array like push().
+const myFish3 = ["angel", "clown", "mandarin"];
+const removed3 = myFish3.customSplice(myFish.length, 0, "sturgeon");
+console.log({ myFish3, removed3 });
+// myFish3: [ 'angel', 'clown', 'mandarin', 'sturgeon' ], removed3: []
+
+// Remove 1 element at index 3
+const myFish4 = ["angel", "clown", "drum", "mandarin", "sturgeon"];
+const removed4 = myFish4.customSplice(3, 1);
+console.log({ myFish4, removed4 });
+// myFish4: [ 'angel', 'clown', 'drum', 'sturgeon' ],
+// removed4: [ 'mandarin' ]
+
+// Remove 1 element at index 2, and insert "trumpet"
+const myFish5 = ["angel", "clown", "drum", "sturgeon"];
+const removed5 = myFish5.customSplice(2, 1, "trumpet");
+console.log({ myFish5, removed5 });
+// myFish5: [ 'angel', 'clown', 'trumpet', 'sturgeon' ],
+// removed5: [ 'drum' ]
+
+// Remove 2 elements from index 0, and insert "parrot", "anemone" and "blue"
+const myFish6 = ["angel", "clown", "trumpet", "sturgeon"];
+const removed6 = myFish6.customSplice(0, 2, "parrot", "anemone", "blue");
+console.log({ myFish6, removed6 });
+// myFish6: [ 'parrot', 'anemone', 'blue', 'trumpet', 'sturgeon' ],
+// removed6: [ 'angel', 'clown' ]
+
+// Remove 2 elements, starting from index 2
+const myFish7 = ["parrot", "anemone", "blue", "trumpet", "sturgeon"];
+const removed7 = myFish7.customSplice(2, 2);
+console.log({ myFish7, removed7 });
+// myFish7: [ 'parrot', 'anemone', 'sturgeon' ],
+// removed7: [ 'blue', 'trumpet' ]
+
+// Remove 1 element from index -2
+const myFish8 = ["angel", "clown", "mandarin", "sturgeon"];
+const removed8 = myFish8.customSplice(-2, 1);
+console.log({ myFish8, removed8 });
+// myFish8: [ 'angel', 'clown', 'sturgeon' ], removed8: [ 'mandarin' ]
+
+// Remove all elements, starting from index 2
+const myFish9 = ["angel", "clown", "mandarin", "sturgeon"];
+const removed9 = myFish9.customSplice(2);
+console.log({ myFish9, removed9 });
+// myFish9: [ 'angel', 'clown' ], removed9: [ 'mandarin', 'sturgeon' ]
+```

@@ -1,0 +1,42 @@
+
+## Queue
+
+A simple `Queue` class that follows the **FIFO (First In, First Out)** principle. Elements are added to the end and removed from the front.
+
+Commonly used in scheduling, task queues, and breadth-first search algorithms.
+
+```js filename="queue" copy
+class Queue {
+  constructor() {
+    this.collection = [];
+  }
+
+  enqueue(element) {
+    this.collection.push(element);
+    return this;
+  }
+  dequeue() {
+    this.collection.shift();
+    return this;
+  }
+  front() {
+    return this.collection[0];
+  }
+  get size() {
+    return this.collection.length;
+  }
+  isEmpty() {
+    return this.collection.length === 0;
+  }
+}
+
+const queue = new Queue();
+queue.enqueue("one").enqueue("two");
+// [ 'one', 'two' ]
+queue.dequeue(); // [ 'two' ]
+queue.enqueue("three").enqueue("four");
+// [ 'two', 'three', 'four' ]
+queue.front(); // two
+queue.size; // 3
+queue.isEmpty(); // false
+```

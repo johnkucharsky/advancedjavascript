@@ -1,0 +1,9 @@
+/* Hide Nextra's "Last updated on ..." */
+div[style*="display: none;"] + div:has(time[datetime]) {
+    display: none !important;
+}
+
+/* OR more direct if the structure is stable: */
+div:has(> time[datetime]) {
+    display: none !important;
+}

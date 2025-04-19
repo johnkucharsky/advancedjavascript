@@ -1,0 +1,33 @@
+
+## Retry with exponential backoff
+
+This snippet demonstrates how to implement a retry mechanism when fetching data from an API.
+It attempts to fetch the resource multiple times (up to a given `retries` limit) and waits a specified `delay` between each retry.
+If the request ultimately fails, it throws an error. This is particularly useful for handling flaky network requests
+or ensuring robustness when dealing with unstable APIs.
+
+```js
+async function fetchWithRetry(url, retries, delay = 1000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error);
+
+      if (attempt === retries) {
+        throw new Error(`Failed to fetch after ${retries} retries`);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+const res = await fetchWithRetry("https://pokeapi.co/api/v2/pokemon-color", 3);
+console.log(res);
+```
+

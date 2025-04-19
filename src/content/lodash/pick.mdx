@@ -1,0 +1,34 @@
+
+## pick
+
+The [`_.pick()`](https://lodash.com/docs/4.17.15#pick) method creates a new object by picking
+the specified properties from an existing object. It accepts either a single key or an array of keys to extract.
+
+This custom implementation mimics the `_.pick()` method by using `reduce()` to iterate over the array of
+keys and select only the properties that exist in the source object, returning a new object with the selected properties.
+
+```js filename="pick" copy
+function pick(obj, keys) {
+  if (typeof keys === "string") {
+    return obj[keys] !== undefined ? { [keys]: obj[keys] } : {};
+  }
+
+  return (Array.isArray(keys) ? keys : []).reduce((result, key) => {
+    if (key in obj) {
+      result[key] = obj[key];
+    }
+    return result;
+  }, {});
+}
+
+const user = {
+  name: "Alice",
+  age: 25,
+  email: "alice@example.com",
+  city: "Wonderland",
+};
+
+const picked = pick(user, ["name", "email"]);
+console.log(picked);
+// { name: 'Alice', email: 'alice@example.com' }
+```

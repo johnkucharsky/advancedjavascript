@@ -1,0 +1,152 @@
+
+## Normalized State
+
+The concept of **normalized state** is commonly used in managing complex data structures, such as nested objects or arrays,
+in a way that makes it easier to update and manage state in applications. This approach involves flattening the structure into
+a more accessible format, often using an object with unique IDs as keys, and maintaining relationships between the entities via arrays of IDs (as seen in `childIds`).
+
+In this example, the `TravelPlanComponent` component simulates a travel planning system where each location (node) has a
+title and a set of child locations (nested nodes). The `normalized state` design keeps all the locations in a flat object,
+and relationships between locations are managed using the `childIds` array.
+
+The `removeNodeAndChildren` function recursively removes a node and its children from the state, and `handleComplete` ensures
+that a child node is removed from its parent node’s `childIds`. This architecture makes it easier to update and delete nodes
+or manage complex state in React applications, especially with deep nested structures.
+
+```typescript jsx
+import { useState } from "react";
+
+type TravelNode = {
+  id: number;
+  title: string;
+  childIds: number[];
+};
+
+type TravelPlan = {
+  [key: number]: TravelNode;
+};
+
+const initialTravelPlan: TravelPlan = {
+  0: { id: 0, title: "(Root)", childIds: [1, 42] },
+  1: { id: 1, title: "Earth", childIds: [2, 10] },
+  2: { id: 2, title: "Africa", childIds: [3, 4, 5] },
+  3: { id: 3, title: "Botswana", childIds: [] },
+  4: { id: 4, title: "Egypt", childIds: [] },
+  5: { id: 5, title: "Kenya", childIds: [] },
+  10: { id: 10, title: "Americas", childIds: [11, 12, 13] },
+  11: { id: 11, title: "Argentina", childIds: [] },
+  12: { id: 12, title: "Brazil", childIds: [] },
+  13: { id: 13, title: "Barbados", childIds: [] },
+  42: { id: 42, title: "Moon", childIds: [43, 44, 45] },
+  43: { id: 43, title: "Rheita", childIds: [] },
+  44: { id: 44, title: "Piccolomini", childIds: [] },
+  45: { id: 45, title: "Tycho", childIds: [] },
+};
+
+export default function TravelPlanComponent() {
+  const [travelPlan, setTravelPlan] = useState<TravelPlan>(initialTravelPlan);
+
+  const removeNodeAndChildren = (id: number, plan: TravelPlan): TravelPlan => {
+    const newPlan = { ...plan };
+
+    const removeRecursively = (nodeId: number) => {
+      const node = newPlan[nodeId];
+      if (!node) return;
+
+      // Remove all children recursively
+      node.childIds.forEach(removeRecursively);
+
+      // Delete the current node
+      delete newPlan[nodeId];
+    };
+
+    removeRecursively(id);
+    return newPlan;
+  };
+
+  const handleComplete = (id: number, parentId: number) => {
+    setTravelPlan((prevPlan) => {
+      const updatedPlan = removeNodeAndChildren(id, prevPlan);
+
+      // Remove the child from the parent's childIds array
+
+      updatedPlan[parentId] = {
+        ...updatedPlan[parentId],
+        childIds: updatedPlan[parentId].childIds.filter(
+          (childId) => childId !== id,
+        ),
+      };
+
+      return updatedPlan;
+    });
+  };
+
+  return (
+    <div>
+      {travelPlan[0].childIds.map((childId) => (
+        <RenderPlace
+          key={childId}
+          id={childId}
+          parentId={travelPlan[0].id}
+          travelPlan={travelPlan}
+          handleComplete={handleComplete}
+        />
+      ))}
+    </div>
+  );
+}
+
+const RenderPlace = ({
+  id,
+  parentId,
+  handleComplete,
+  travelPlan,
+}: {
+  id: number;
+  parentId: number;
+  handleComplete: (id: number, parentId: number) => void;
+  travelPlan: TravelPlan;
+}) => {
+  const node = travelPlan[id];
+
+  if (!node) return null;
+
+  return (
+    <ol style={{ paddingInlineStart: 0 }}>
+      <li
+        style={{
+          display: "flex",
+          gap: "1rem",
+          alignItems: "center",
+        }}
+      >
+        <h5
+          style={{
+            marginBlockStart: 5,
+            marginBlockEnd: 5,
+          }}
+        >
+          {node.title}
+        </h5>
+        <button onClick={() => handleComplete(node.id, parentId)}>
+          Complete
+        </button>
+      </li>
+      {node.childIds.length > 0 && (
+        <ol>
+          {node.childIds.map((childId) => (
+            <li key={childId}>
+              <RenderPlace
+                id={childId}
+                parentId={node.id}
+                travelPlan={travelPlan}
+                handleComplete={handleComplete}
+              />
+            </li>
+          ))}
+        </ol>
+      )}
+    </ol>
+  );
+};
+```

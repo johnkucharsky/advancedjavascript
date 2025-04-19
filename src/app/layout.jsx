@@ -1,10 +1,11 @@
 /* eslint-env node */
-import { Footer, Layout, Navbar } from 'nextra-theme-docs'
-import { Head } from 'nextra/components'
-import { getPageMap } from 'nextra/page-map'
-import 'nextra-theme-docs/style.css'
+import { Layout, Navbar } from "nextra-theme-docs";
+import { Head } from "nextra/components";
+import { getPageMap } from "nextra/page-map";
+import "nextra-theme-docs/style.css";
+import "./global.css";
 
-export const metadata= {
+export const metadata = {
   metadataBase: new URL("https://www.advancedjavascript.org"),
   title: {
     template: "%s - Advanced JavaScript.",
@@ -42,14 +43,17 @@ export default async function RootLayout({ children }) {
     <Navbar
       logo={
         <div>
-          <div>Advanced JavaScript</div>{' '}
-          <div style={{ opacity: '60%', fontSize: "13px" }}>Real-world knowledge</div>
+          <div>Advanced JavaScript</div>{" "}
+          <div style={{ opacity: "60%", fontSize: "13px" }}>
+            Real-world knowledge
+          </div>
         </div>
       }
-
+      projectLink={"https://github.com/JohnKucharsky/advancedjavascript"}
     />
-  )
-  const pageMap = await getPageMap()
+  );
+
+  const pageMap = await getPageMap();
 
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
@@ -57,8 +61,7 @@ export default async function RootLayout({ children }) {
       <body>
         <Layout
           navbar={navbar}
-          footer={<Footer>MIT {new Date().getFullYear()} © Advanced JavaScript.</Footer>}
-          docsRepositoryBase="https://github.com/shuding/nextra/blob/main/examples/docs"
+          docsRepositoryBase="https://github.com/JohnKucharsky/advancedjavascript/src"
           sidebar={{ defaultMenuCollapseLevel: 1 }}
           editLink={null}
           pageMap={pageMap}
@@ -67,5 +70,5 @@ export default async function RootLayout({ children }) {
         </Layout>
       </body>
     </html>
-  )
+  );
 }

@@ -1,0 +1,27 @@
+
+## contains duplicate
+
+This function checks if a given array contains any duplicate values.
+
+It uses a `Set` to track elements that have already been seen while iterating through the array.
+If a value is found in the `Set`, the function returns `true`, indicating a duplicate.
+If no duplicates are found by the end of iteration, it returns `false`.
+
+```js
+function containsDuplicate(nums) {
+  const seen = new Set();
+
+  for (const num of nums) {
+    if (seen.has(num)) {
+      return true;
+    }
+
+    seen.add(num);
+  }
+
+  return false;
+}
+
+console.log(containsDuplicate([1, 1, 3, 4])); // true
+console.log(containsDuplicate([1, 3, 4])); // false
+```

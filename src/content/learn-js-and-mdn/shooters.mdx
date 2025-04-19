@@ -1,0 +1,34 @@
+
+## shooters
+
+Every function is meant to output its number. All `shooter` functions are created in the lexical
+environment of `makeArmy()` function. But when `army[5]()` is called, `makeArmy` has already
+finished its job, and the final value of `i` is `10` (`while` stops at `i=10`). As the result,
+all `shooter` functions get the same value from the outer lexical environment and that is,
+the last value, `i=10`. Solution is to save variable `let j = i`
+
+```js filename="lexical environment(scope)" copy
+function makeArmy() {
+  const shooters = [];
+
+  let i = 0;
+  while (i < 10) {
+    let j = i; // save local variable
+    const shooter = function () {
+      // create a shooter function,
+      return j; // that should show its number
+    };
+    shooters.push(shooter); // and add it to the array
+    i++;
+  }
+
+  // ...and return the array of shooters
+  return shooters;
+}
+
+const army = makeArmy();
+
+console.log(army[0]()); // 0
+console.log(army[1]()); // 1
+console.log(army[5]()); // 5
+```

@@ -1,0 +1,51 @@
+
+## toSorted
+
+The [`toSorted()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted)
+method is a copying version of the `sort()` method. It **returns a new array** with the elements sorted in ascending order.
+
+This custom implementation mimics the behavior of `toSorted()` by creating a shallow copy of the original array and performing
+a sort operation on it without modifying the original array.
+
+```js filename="sort" copy
+Array.prototype.customSort = function (compareFn) {
+  if (typeof compareFn !== "function") {
+    compareFn = (a, b) => (String(a) > String(b) ? 1 : -1);
+  }
+
+  const copy = [...this];
+
+  // bubble sort
+  const n = this.length;
+  for (let i = 0; i < n - 1; i++) {
+    let swapped = false;
+    for (let j = 0; j < n - i - 1; j++) {
+      if (compareFn(copy[j], copy[j + 1]) > 0) {
+        // Swap using destructuring
+        [copy[j], copy[j + 1]] = [copy[j + 1], copy[j]];
+        swapped = true;
+      }
+    }
+    // If no two elements were swapped, the array is sorted
+    if (!swapped) break;
+  }
+
+  return copy;
+};
+
+const months = ["March", "Jan", "Feb", "Dec"];
+console.log(months.customSort());
+// ["Dec", "Feb", "Jan", "March"]
+
+const array1 = ["1", "30", "4", "21", "1000"];
+console.log(array1.customSort());
+// ["1", "1000", "21", "30", "4"]
+
+const array2 = [1, 30, 4, 21, 1000];
+console.log(array2.customSort());
+// [1, 1000, 21, 30, 4]
+
+const array3 = [5, 8, 100, 0];
+console.log(array3.customSort((a, b) => a - b));
+// [0, 5, 8, 100]
+```

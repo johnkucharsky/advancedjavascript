@@ -1,0 +1,81 @@
+
+## filter by related property
+
+This utility filters a list of objects based on a **related property** found in another array — similar to a **join + filter** operation.
+
+In this example, we filter items in the `objects` array based on the `class` value of their related `object_type`, which is matched against the `object_types` array.
+
+### Highlights:
+- `groupBy()` helps group `object_types` by `class` for fast lookup.
+- `filterObjectsByClass()` efficiently filters items by matching related object type's class.
+- Uses TypeScript generics for reusability and type safety.
+
+```ts filename="filter by related" copy
+const objects = [
+  { id: 1, name: "Test 1", object_type: 1 },
+  { id: 2, name: "Test 2", object_type: 1 },
+  { id: 3, name: "Test 3", object_type: 2 },
+  { id: 4, name: "Test 4", object_type: 3 },
+];
+
+const object_types = [
+  { id: 1, class: "orange" },
+  { id: 2, class: "orange" },
+  { id: 3, class: "apple" },
+  { id: 4, class: "cheese" },
+];
+
+const groupBy = <T, K extends string | number | symbol>(
+  arr: T[],
+  callback: (item: T) => K,
+): Record<K, T[]> => {
+  return arr.reduce(
+    (acc: Record<K, T[]>, item: T) => {
+      const key = callback(item);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+
+      return acc;
+    },
+    {} as Record<K, T[]>,
+  );
+};
+
+const filterObjectsByClass = <T>(
+  cls: string,
+  objects: (T & { object_type: number })[],
+  objectTypes: { id: number; class: string }[],
+): T[] => {
+  const result: T[] = [];
+
+  const objTypesByClass = groupBy(
+    objectTypes,
+    (item) => item.class,
+  );
+
+  for (const item of objects) {
+    if (
+      objTypesByClass[cls].find(
+        (objectType) => objectType.id === item.object_type,
+      )
+    ) {
+      result.push(item);
+    }
+  }
+
+  return result;
+};
+
+const filteredObjects = filterObjectsByClass(
+  "orange",
+  objects,
+  object_types,
+);
+console.log(filteredObjects);
+
+// [
+//   { id: 1, name: 'Test 1', object_type: 1 },
+//   { id: 2, name: 'Test 2', object_type: 1 },
+//   { id: 3, name: 'Test 3', object_type: 2 }
+// ]
+```

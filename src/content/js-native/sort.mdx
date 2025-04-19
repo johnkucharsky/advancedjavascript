@@ -1,0 +1,50 @@
+
+## sort
+
+The [`sort()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+method sorts the elements of an array **in place**, changing the array's order and returning the reference to the sorted array.
+By default, the sort order is ascending, and it compares elements as strings based on their UTF-16 code unit values.
+
+This custom implementation of `Array.prototype.sort()` uses the **bubble sort** algorithm and accepts an optional compare function to define the sorting criteria.
+
+
+```js filename="sort" copy
+Array.prototype.customSort = function (compareFn) {
+  if (typeof compareFn !== "function") {
+    compareFn = (a, b) => (String(a) > String(b) ? 1 : -1);
+  }
+
+  // bubble sort
+  let n = this.length;
+  for (let i = 0; i < n - 1; i++) {
+    let swapped = false;
+    for (let j = 0; j < n - i - 1; j++) {
+      if (compareFn(this[j], this[j + 1]) > 0) {
+        // Swap using destructuring
+        [this[j], this[j + 1]] = [this[j + 1], this[j]];
+        swapped = true;
+      }
+    }
+    // If no two elements were swapped, the array is sorted
+    if (!swapped) break;
+  }
+
+  return this;
+};
+
+const months = ["March", "Jan", "Feb", "Dec"];
+months.customSort();
+console.log(months); // ["Dec", "Feb", "Jan", "March"]
+
+const array1 = ["1", "30", "4", "21", "1000"];
+array1.customSort();
+console.log(array1); // ["1", "1000", "21", "30", "4"]
+
+const array2 = [1, 30, 4, 21, 1000];
+array2.customSort();
+console.log(array2); // [1, 1000, 21, 30, 4]
+
+const array3 = [5, 8, 100, 0];
+array3.customSort((a, b) => a - b);
+console.log(array3); // [0, 5, 8, 100]
+```

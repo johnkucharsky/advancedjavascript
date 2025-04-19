@@ -1,0 +1,79 @@
+
+## Set
+
+The [`Set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set)
+object lets you store **unique values of any type**, whether primitive or object references.
+A `Set` automatically removes duplicate elements and maintains the **insertion order**.
+
+This example demonstrates how to create a set, add/remove elements, check membership,
+iterate through a set, and perform common set operations like union, intersection, and difference.
+
+```js filename="Set" copy
+// Create a Set
+const mySet = new Set([1, 2, 3, 4, 5]);
+console.log(mySet); // Set { 1, 2, 3, 4, 5 }
+
+// returns a new set iterator object that contains the values
+// for each element in this set in insertion order
+const setValues = mySet.values();
+console.log(setValues);
+// [Set Iterator] { 1, 2, 3, 4, 5 }
+console.log(setValues.next()); // { value: 1, done: false }
+
+// Add elements to a Set
+mySet.add(6); // Adds a new element
+mySet.add(2); // Duplicate values are ignored
+console.log(mySet); // Set { 1, 2, 3, 4, 5, 6 }
+
+// Check if a Set contains an element
+console.log(mySet.has(3)); // true
+console.log(mySet.has(10)); // false
+
+// Remove elements from a Set
+mySet.delete(4); // Removes the element 4
+console.log(mySet); // Set { 1, 2, 3, 5, 6 }
+
+// Get the size of a Set
+console.log(mySet.size); // 5
+
+// Iterate over a Set
+for (const value of mySet) {
+  console.log(value); // Logs each value in the Set
+}
+
+// Convert a Set to an Array
+const arrayFromSet = Array.from(mySet); // Using Array.from()
+console.log(arrayFromSet); // [1, 2, 3, 5, 6]
+
+const anotherArray = [...mySet]; // Using spread operator
+console.log(anotherArray); // [1, 2, 3, 5, 6]
+
+// Clear a Set
+mySet.clear(); // Removes all elements
+console.log(mySet); // Set {}
+
+// Find the Union of Two Sets
+const setA = new Set([1, 2, 3]);
+const setB = new Set([3, 4, 5]);
+// Combines elements from both sets
+const union = new Set([...setA, ...setB]);
+console.log(union); // Set { 1, 2, 3, 4, 5 }
+
+// Find the Intersection of Two Sets
+// Common elements
+const intersection = new Set([...setA].filter((x) => setB.has(x)));
+console.log(intersection); // Set { 3 }
+
+// Find the Difference of Two Sets
+// Elements in setA not in setB
+const difference = new Set([...setA].filter((x) => !setB.has(x)));
+console.log(difference); // Set { 1, 2 }
+
+const a = {};
+const b = {};
+const c = {};
+const setOfObjects = new Set([a, a, b]);
+console.log(setOfObjects); // Set(2) { {}, {} }
+console.log(setOfObjects.has(a)); // true
+console.log(setOfObjects.has(c)); // false
+```

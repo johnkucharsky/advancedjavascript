@@ -1,113 +1,66 @@
-import { Steps } from 'nextra/components'
 
-# Get Started
+# Getting Started
 
-## Quick start with Vercel
+Welcome to **Advanced Javascript** – a comprehensive collection of **JavaScript** and **TypeScript** cheatsheets, code snippets.
+Explore practical examples covering syntax, algorithms, system design, and real-world coding problems — perfect for daily practice,
+interview preparation, or leveling up your **JS/TS** skills, all demonstrated with clear code snippets and descriptions.
 
-You can start by creating your own Nextra site and deploying to Vercel by
-clicking the link:
+> This resource is **complementary** to excellent official documentation and learning platforms like [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript), [JavaScript.info](https://javascript.info/), and [react.dev](https://react.dev/).
+> If you're just starting out, I highly recommend reading those resources **first** to build a solid foundation.
+> However, you can also begin with **Advanced Javascript** to explore examples in action, reinforce what you learn, or quickly reference key concepts while coding.
 
-[![](https://vercel.com/button)](https://vercel.com/new/clone?demo-description=Markdown%20powered%20docs%20site.%20Built%20with%20Next.js.&demo-image=https%3A%2F%2Fnextra.vercel.app%2Fdemo.png&demo-title=Documentation%20Starter%20Kit&demo-url=https%3A%2F%2Fnextra.vercel.app%2F&project-name=nextjs-docs&repository-name=nextjs-docs&s=https%3A%2F%2Fgithub.com%2Fshuding%2Fnextra&from=templates)
+## 🧠 Fundamentals
 
-Vercel will create the Nextra repository and deploy the site for you with just a
-few clicks. Once done, every change in the repository will be deployed
-automatically.
+- Learn JS and MDN \
+A curated collection of practical **JavaScript** and **TypeScript** examples, from [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript) and [JavaScript.info](https://javascript.info/).
+Includes core features such as the **event loop**, **memoization**, **loops**, **recursion**, **context binding**, **decorators**, and **async generators**
 
-## Create manually
+- JS Native \
+Reimplementation of native **JavaScript** methods, built-in features, and low-level behavior — understand how they work under the hood.
 
-Nextra works like a Next.js plugin, and it accepts a theme config (layout) to
-render the page. To start: [^3]
+- Theory \
+Covers deep-dive programming concepts like composition vs inheritance, the call stack, functional patterns, SOLID principles,
+and detailed examples of type conversions, operator behavior, and equality comparisons in JavaScript.
 
-<Steps>
-### Install Next.js, Nextra and React [^1]
+## 🏗️ System Design & Architecture
 
-```sh npm2yarn
-npm i react react-dom next nextra
-```
+- System Design and Patterns \
+Explore **JavaScript** implementations of system design concepts: queues, stacks, reducers, async workflows, and more.
 
-### Install the docs theme [^2]
+- Graphs \
+Graph data structures, traversal algorithms, and visual patterns.
 
-```sh npm2yarn
-npm i nextra-theme-docs
-```
+## 🔢 Algorithms & Utilities
 
-### Create the following Next.js config and theme config under the root directory
+- Sorting \
+Implementations of common sorting algorithms like quicksort, mergesort, and more.
 
-```js filename="next.config.mjs"
-import nextra from 'nextra'
+- Lodash \
+Handy utility functions using the **Lodash** library.
 
-const withNextra = nextra({
-  theme: 'nextra-theme-blog',
-  themeConfig: './theme.config.js'
-})
-export default withNextra()
-```
 
-### Create a `theme.config.js` file for the docs theme
+## ⚛️ Frameworks & Tools
 
-```js filename="theme.config.js"
-export default {
-  project: {
-    link: 'https://github.com/shuding/nextra' // GitHub link in the navbar
-  },
-  docsRepositoryBase: 'https://github.com/shuding/nextra/blob/master', // base URL for the docs repository
-  getNextSeoProps: () => ({ titleTemplate: '%s – Nextra' }),
-  navigation: true,
-  darkMode: true,
-  footer: {
-    text: `MIT ${new Date().getFullYear()} © Shu Ding.`
-  },
-  editLink: {
-    text: 'Edit this page on GitHub'
-  },
-  logo: (
-    <>
-      <svg>...</svg>
-      <span>Next.js Static Site Generator</span>
-    </>
-  ),
-  head: (
-    <>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="description" content="Nextra: the next docs builder" />
-      <meta name="og:title" content="Nextra: the next docs builder" />
-    </>
-  ),
-  primaryHue: {
-    dark: 204,
-    light: 212
-  }
-}
-```
+React-focused code snippets covering concepts like `children`, rendering optimizations, state normalization, and hooks such
+as `useReducer` and `usePrevious`
 
-> [!NOTE]
->
-> More configuration options for the docs theme can be found
-> [here](/themes/docs/configuration).
+## 🧪 Various
 
-### You are good to go! Run `next dev` to start
+A diverse collection of **JavaScript** edge cases, patterns, and utilities — from mastering `call`, `bind`, and `apply` to deep cloning,
+recursive data transforms, closures, and event loop tricks.
 
-</Steps>
+## About Me
 
----
+I'm a frontend developer based in Russia, work in company named [Sellego](https://sellego.com/blog/). I work with React and Node.js.
 
-<span id="sidebar-and-anchor-links" />
+### Github
 
-> [!NOTE]
->
-> Any `.md` or `.mdx` file will turn into a doc page and be displayed in
-> sidebar. You can also create a `_meta.js` file to customize the page order and
-> title. <br /> Check the source code: https://github.com/shuding/nextra for
-> more information.
+- [this project](https://github.com/JohnKucharsky/js-cheatsheet)
+- [react effector mui](https://github.com/JohnKucharsky/react-effector-mui)
+- [react redux mui](https://github.com/JohnKucharsky/react-redux-mui)
+- [react mobx mui](https://github.com/JohnKucharsky/react-mobx-mui)
 
-> [!TIP]
->
-> You can also use
-> [`<style jsx>`](https://nextjs.org/docs/basic-features/built-in-css-support#css-in-js)
-> to style elements inside `theme.config.js`.
+### Contacts
 
-[^1]: Install Next.js, Nextra and React.
-
-[^2]: Install the docs theme.
-
-[^3]: To start.
+- [@johnkucharsky – telegram](https://t.me/johnkucharsky)
+- [johnkucharskyfirst@gmail.com](mailto:johnkucharskyfirst@gmail.com)

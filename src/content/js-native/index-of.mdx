@@ -1,0 +1,37 @@
+
+## indexOf
+
+The [`indexOf()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf)
+method returns the **first index** at which a given element can be found in the array, or `-1` if it is not present.
+It uses **strict equality (`===`)** for comparison and supports an optional `fromIndex` to control the search starting point.
+
+This custom implementation of `Array.prototype.indexOf()` also handles negative indexing by adjusting the start position.
+
+```js filename="indexOf" copy
+Array.prototype.customIndexOf = function (searchElement, fromIndex = 0) {
+  if (fromIndex < 0) {
+    fromIndex = this.length + fromIndex;
+  }
+
+  for (let i = fromIndex; i < this.length; i++) {
+    if (this[i] === searchElement) {
+      return i;
+    }
+  }
+
+  return -1;
+};
+
+const beasts = ["ant", "bison", "camel", "duck", "bison"];
+console.log(beasts.customIndexOf("bison")); // 1
+// Start from index 2
+console.log(beasts.customIndexOf("bison", 2)); // 4
+console.log(beasts.customIndexOf("giraffe")); // -1
+
+const array = [2, 9, 9];
+console.log(array.customIndexOf(9, 2)); // 2
+console.log(array.customIndexOf(2, -1)); // -1
+console.log(array.customIndexOf(2, -3)); // 0
+console.log(array.customIndexOf(2, -100)); // 0
+```
+

@@ -1,0 +1,31 @@
+
+## Proxy
+
+This example uses a `Proxy` to intercept property access on an object.
+When a key is found in the `dictionary`, the translation is returned; otherwise, the original key is returned as a fallback.
+Proxies are powerful for defining custom behavior for fundamental operations like `get`, `set`, and more.
+
+```js filename="Proxy" copy
+let dictionary = {
+  Hello: "Hola",
+  Bye: "Adiós",
+};
+
+dictionary = new Proxy(dictionary, {
+  get(target, phrase) {
+    // intercept reading a property from dictionary
+    if (phrase in target) {
+      // if we have it in the dictionary
+      return target[phrase]; // return the translation
+    } else {
+      // otherwise, return the non-translated phrase
+      return phrase;
+    }
+  },
+});
+
+// Look up arbitrary phrases in the dictionary!
+// At worst, they're not translated.
+console.log(dictionary["Hello"]); // Hola
+console.log(dictionary["Welcome to Proxy"]); // Welcome to Proxy
+```

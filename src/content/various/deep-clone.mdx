@@ -1,0 +1,40 @@
+
+## deep clone
+
+The `deepClone` function recursively copies all levels of an object or array, creating a fully independent clone.
+This avoids shared references and ensures that changes to nested structures in the cloned object won’t affect the original.
+
+It handles:
+- Primitive types and `null`
+- Arrays using recursive `map`
+- Plain objects using recursive property traversal
+
+Perfect for deep copying JSON-compatible data without using `JSON.parse(JSON.stringify(...))`,
+which fails on special types like `Date`, `Map`, `Set`, or circular references.
+
+```js
+function deepClone(obj) {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    // Recursively clone array elements
+    return obj.map(deepClone);
+  }
+
+  const clonedObj = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      // Recursively clone object properties
+      clonedObj[key] = deepClone(obj[key]);
+    }
+  }
+
+  return clonedObj;
+}
+
+const obj = { a: 1, b: [{ c: 2, d: 3 }] };
+const clonedObj = deepClone(obj);
+console.log(clonedObj); // { a: 1, b: [ { c: 2, d: 3 } ] }
+```

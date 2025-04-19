@@ -1,0 +1,41 @@
+## entries
+
+The [`entries()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries)
+method returns a new array iterator object containing `[index, value]` pairs for each element.
+It’s commonly used in `for...of` loops to iterate with both index and value.
+
+This example recreates `Array.prototype.entries()` using a generator to yield key/value pairs.
+
+```js filename="entries" copy
+Array.prototype.customEntries = function () {
+  const entries = [];
+  for (let i = 0; i < this.length; i++) {
+    entries.push([i, this[i]]);
+  }
+
+  function* iterator() {
+    yield* entries;
+  }
+
+  return iterator();
+};
+
+const arr = [{ x: "a" }, "b", ["c"]];
+const iterator = arr.customEntries();
+
+console.log(iterator.next());
+// { value: [ 0, { x: 'a' } ], done: false }
+console.log(iterator.next());
+// { value: [ 1, 'b' ], done: false }
+console.log(iterator.next());
+// { value: [ 2, [ 'c' ] ], done: false }
+console.log(iterator.next());
+// { value: undefined, done: true }
+
+for (const [index, element] of arr.customEntries()) {
+  console.log(index, element);
+}
+// 0 { x: 'a' }
+// 1 b
+// 2 [ 'c' ]
+```

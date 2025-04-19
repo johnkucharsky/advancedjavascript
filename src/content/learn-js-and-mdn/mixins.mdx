@@ -1,0 +1,56 @@
+## Mixins
+
+Mixins allow objects to share reusable behavior without using classical inheritance.
+In this example, the `CanSpeak` and `CanWalk` mixins are applied to different classes using
+`Object.assign`, enabling both `Person` and `Robot` to share functionality like `speak` and `walk`.
+
+[mixins](https://javascript.info/mixins)
+
+```js filename="mixins" copy
+// Define a mixin for shared behavior
+const CanSpeak = {
+  speak() {
+    console.log(`${this.name} says: ${this.message}`);
+  },
+};
+
+// Define another mixin
+const CanWalk = {
+  walk() {
+    console.log(`${this.name} is walking.`);
+  },
+};
+
+// Create a base class
+class Person {
+  constructor(name, message) {
+    this.name = name;
+    this.message = message;
+  }
+}
+
+// Apply mixins to the class
+Object.assign(Person.prototype, CanSpeak, CanWalk);
+
+// Create an instance of the class
+const john = new Person('John', 'Hello, world!');
+
+// Use methods from mixins
+john.speak(); // Output: John says: Hello, world!
+john.walk();  // Output: John is walking.
+
+// Another example with a different class
+class Robot {
+  constructor(name, message) {
+    this.name = name;
+    this.message = message;
+  }
+}
+
+// Apply mixins to the Robot class
+Object.assign(Robot.prototype, CanSpeak, CanWalk);
+
+const r2d2 = new Robot('R2D2', 'Beep boop');
+r2d2.speak(); // Output: R2D2 says: Beep boop
+r2d2.walk();  // Output: R2D2 is walking.
+```
