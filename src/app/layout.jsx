@@ -11,7 +11,7 @@ export const metadata = {
     template: "%s - Advanced JavaScript.",
   },
   description:
-    "Master advanced JavaScript with practical examples, real-world techniques, and in-depth explanations.",
+    "JavaScript snippets based on real interview questions and job tasks, crafted to give you hands-on experience with advanced concepts.",
   applicationName: "Advanced JavaScript",
   generator: "Next.js",
   appleWebApp: {
@@ -27,7 +27,7 @@ export const metadata = {
   openGraph: {
     title: "Advanced JavaScript",
     description:
-      "Master advanced JavaScript with practical examples, real-world techniques, and in-depth explanations.",
+      "JavaScript snippets based on real interview questions and job tasks, crafted to give you hands-on experience with advanced concepts.",
     url: "https://www.advancedjavascript.org",
     siteName: "Advanced JavaScript",
     images: [
@@ -39,7 +39,6 @@ export const metadata = {
     type: "website",
   },
 };
-
 export default async function RootLayout({ children }) {
   const navbar = (
     <Navbar
@@ -47,7 +46,7 @@ export default async function RootLayout({ children }) {
         <div>
           <div>Advanced JavaScript</div>{" "}
           <div style={{ opacity: "60%", fontSize: "13px" }}>
-            Real-world knowledge
+            Practical, real-world knowledge
           </div>
         </div>
       }
