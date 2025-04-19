@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.advancedjavascript.org
+
+# Sitemaps
+Sitemap: https://www.advancedjavascript.org/sitemap.xml
