@@ -1,0 +1,200 @@
+---
+title: JavaScript Set, Object.groupBy, Object.assign, and Array.entries
+description: Learn how Set, Object.groupBy, Object.assign, and Array.entries work in JavaScript. Includes custom implementations and examples to solidify your understanding of data structures and utility methods.
+sidebarTitle: Set and Object
+---
+
+# JavaScript Set, Object.groupBy, Object.assign, and Array.entries
+
+JavaScript utilities `Set`, `Object.groupBy()`, `Object.assign()`, and `Array.prototype.entries()`.
+These examples show how to work with unique collections, group items by category, clone or merge objects, and iterate over arrays with
+index-value pairs — all with hands-on explanations and custom implementations for deeper insight.
+
+## Set
+
+The [`Set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) object lets you store **unique values of any type**, whether primitive or object references.
+A `Set` automatically removes duplicate elements and maintains the **insertion order**.
+
+This example demonstrates how to create a set, add/remove elements, check membership,
+iterate through a set, and perform common set operations like union, intersection, and difference.
+
+```js filename="Set" copy
+// Create a Set
+const mySet = new Set([1, 2, 3, 4, 5]);
+console.log(mySet); // Set { 1, 2, 3, 4, 5 }
+
+// returns a new set iterator object that contains the values
+// for each element in this set in insertion order
+const setValues = mySet.values();
+console.log(setValues);
+// [Set Iterator] { 1, 2, 3, 4, 5 }
+console.log(setValues.next()); // { value: 1, done: false }
+
+// Add elements to a Set
+mySet.add(6); // Adds a new element
+mySet.add(2); // Duplicate values are ignored
+console.log(mySet); // Set { 1, 2, 3, 4, 5, 6 }
+
+// Check if a Set contains an element
+console.log(mySet.has(3)); // true
+console.log(mySet.has(10)); // false
+
+// Remove elements from a Set
+mySet.delete(4); // Removes the element 4
+console.log(mySet); // Set { 1, 2, 3, 5, 6 }
+
+// Get the size of a Set
+console.log(mySet.size); // 5
+
+// Iterate over a Set
+for (const value of mySet) {
+  console.log(value); // Logs each value in the Set
+}
+
+// Convert a Set to an Array
+const arrayFromSet = Array.from(mySet); // Using Array.from()
+console.log(arrayFromSet); // [1, 2, 3, 5, 6]
+
+const anotherArray = [...mySet]; // Using spread operator
+console.log(anotherArray); // [1, 2, 3, 5, 6]
+
+// Clear a Set
+mySet.clear(); // Removes all elements
+console.log(mySet); // Set {}
+
+// Find the Union of Two Sets
+const setA = new Set([1, 2, 3]);
+const setB = new Set([3, 4, 5]);
+// Combines elements from both sets
+const union = new Set([...setA, ...setB]);
+console.log(union); // Set { 1, 2, 3, 4, 5 }
+
+// Find the Intersection of Two Sets
+// Common elements
+const intersection = new Set([...setA].filter((x) => setB.has(x)));
+console.log(intersection); // Set { 3 }
+
+// Find the Difference of Two Sets
+// Elements in setA not in setB
+const difference = new Set([...setA].filter((x) => !setB.has(x)));
+console.log(difference); // Set { 1, 2 }
+
+const a = {};
+const b = {};
+const c = {};
+const setOfObjects = new Set([a, a, b]);
+console.log(setOfObjects); // Set(2) { {}, {} }
+console.log(setOfObjects.has(a)); // true
+console.log(setOfObjects.has(c)); // false
+```
+
+## Object.groupBy
+
+The [`Object.groupBy()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/groupBy)
+static method groups elements of an iterable based on the **string key** returned by a callback function.
+It returns a plain object with keys representing group names and values as arrays of grouped items.
+
+This example shows a manual implementation using `Array.prototype.reduce()` to group inventory items by their `type` field.
+
+```js filename="Object.groupBy" copy
+const groupBy = (arr, callback) => {
+  return arr.reduce((acc = {}, item) => {
+    const key = callback(item);
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(item);
+
+    return acc;
+  }, {});
+};
+
+const inventory = [
+  { name: "asparagus", type: "vegetables", quantity: 5 },
+  { name: "bananas", type: "fruit", quantity: 0 },
+  { name: "goat", type: "meat", quantity: 23 },
+  { name: "cherries", type: "fruit", quantity: 5 },
+  { name: "fish", type: "meat", quantity: 22 },
+];
+const result = groupBy(inventory, ({ type }) => type);
+console.log(result);
+
+// {
+//   vegetables: [{ name: "asparagus", type: "vegetables", quantity: 5 }],
+//   fruit: [
+//     { name: "bananas", type: "fruit", quantity: 0 },
+//     { name: "cherries", type: "fruit", quantity: 5 },
+//   ],
+//   meat: [
+//     { name: "goat", type: "meat", quantity: 23 },
+//     { name: "fish", type: "meat", quantity: 22 },
+//   ],
+// };
+```
+
+## Object.assign
+
+The [`Object.assign()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
+method copies all **enumerable own properties** from one or more source objects to a target object.
+It returns the **modified target**, making it useful for shallow cloning or merging multiple objects.
+
+This example also shows how `Object.assign()` behaves similarly to the spread operator (`...`) when cloning simple objects.
+
+```js filename="Object.assign" copy
+const obj = {
+  foo: 1,
+  get bar() {
+    return 2;
+  },
+};
+
+let copy = Object.assign({}, obj);
+console.log(copy); // { foo: 1, bar: 2 }
+// The value of copy.bar is obj.bar's getter's return value.
+
+// Following 2 lines of code are the same.
+const objClone = { ...obj }; // { foo: 1, bar: 2 }
+const objClone2 = Object.assign({}, obj); // { foo: 1, bar: 2 }
+```
+
+## Array.entries
+
+The [`entries()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/entries)
+method returns a new array iterator object containing `[index, value]` pairs for each element.
+It’s commonly used in `for...of` loops to iterate with both index and value.
+
+This example recreates `Array.prototype.entries()` using a generator to yield key/value pairs.
+
+```js filename="entries" copy
+Array.prototype.customEntries = function () {
+  const entries = [];
+  for (let i = 0; i < this.length; i++) {
+    entries.push([i, this[i]]);
+  }
+
+  function* iterator() {
+    yield* entries;
+  }
+
+  return iterator();
+};
+
+const arr = [{ x: "a" }, "b", ["c"]];
+const iterator = arr.customEntries();
+
+console.log(iterator.next());
+// { value: [ 0, { x: 'a' } ], done: false }
+console.log(iterator.next());
+// { value: [ 1, 'b' ], done: false }
+console.log(iterator.next());
+// { value: [ 2, [ 'c' ] ], done: false }
+console.log(iterator.next());
+// { value: undefined, done: true }
+
+for (const [index, element] of arr.customEntries()) {
+  console.log(index, element);
+}
+// 0 { x: 'a' }
+// 1 b
+// 2 [ 'c' ]
+```
+
+

@@ -1,0 +1,149 @@
+---
+title: Graph Traversal Algorithms in JavaScript
+description: Graphs in JavaScript using Depth-First Search (DFS) and Breadth-First Search (BFS). Includes implementations for both directed and undirected graphs using adjacency lists
+sidebarTitle: Graph Traversal
+---
+
+# Graph Traversal Algorithms in JavaScript
+
+Learn how to traverse graphs in JavaScript using Depth-First Search (DFS) and Breadth-First Search (BFS).
+These examples show how to implement both directed and undirected graph traversal using adjacency lists and recursive or iterative logic.
+Ideal for interview prep and understanding graph algorithms from the ground up.
+
+## Has Path in Directed Graphs (DFS & BFS)
+
+Determines whether a path exists between two nodes in a directed graph.
+Includes both **Depth-First Search (DFS)** and **Breadth-First Search (BFS)** implementations.
+
+The graph is represented as an **adjacency list**.
+
+```ts filename="has path" copy
+type Graph = Record<string, string[]>;
+
+// Depth-First Search
+const hasPath = (
+  graph: Graph,
+  src: string,
+  dst: string,
+): boolean => {
+  if (src === dst) return true;
+
+  for (const neighbor of graph[src]) {
+    if (hasPath(graph, neighbor, dst)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+// Breadth-First Search (uncomment to use)
+/*
+const hasPath = (
+  graph: Graph,
+  src: string,
+  dst: string,
+): boolean => {
+  const queue: string[] = [src];
+
+  while (queue.length) {
+    const current = queue.shift();
+    if (current === dst) return true;
+
+    if (current && graph[current]) {
+      for (const neighbor of graph[current]) {
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return false;
+};
+*/
+
+const adjacentList = {
+  f: ["g", "i"],
+  g: ["h"],
+  h: [],
+  i: ["g", "k"],
+  j: ["i"],
+  k: [],
+};
+
+console.log(hasPath(adjacentList, "f", "k")); // true
+console.log(hasPath(adjacentList, "f", "j")); // false
+
+console.log(
+  hasPath(
+    {
+      v: ["x", "w"],
+      w: [],
+      x: [],
+      y: ["z"],
+      z: [],
+    },
+    "v",
+    "z",
+  ),
+); // false
+```
+
+## Path Existence in Undirected Graphs (DFS with Visited Set)
+
+Checks if a path exists between two nodes in an **undirected graph**, using **DFS** with a `visited` set to avoid cycles.
+
+The graph is built from an `edges` list using an **adjacency list** structure.
+
+```ts filename="undirected path" copy
+const undirectedPath = (
+  edges: [string, string][],
+  nodeA: string,
+  nodeB: string,
+): boolean => {
+  const graph = buildGraph(edges);
+  return hasPath(graph, nodeA, nodeB, new Set());
+};
+
+const buildGraph = (edges: [string, string][]) => {
+  const graph: Record<string, string[]> = {};
+
+  for (const [a, b] of edges) {
+    if (!(a in graph)) graph[a] = [];
+    if (!(b in graph)) graph[b] = [];
+    graph[a].push(b);
+    graph[b].push(a);
+  }
+
+  return graph;
+};
+
+const hasPath = (
+  graph: Record<string, string[]>,
+  src: string,
+  dst: string,
+  visited: Set<string>,
+): boolean => {
+  if (src === dst) return true;
+  if (visited.has(src)) return false;
+  visited.add(src);
+
+  for (const neighbor of graph[src]) {
+    if (hasPath(graph, neighbor, dst, visited)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const edges: [string, string][] = [
+  ["i", "j"],
+  ["k", "i"],
+  ["m", "k"],
+  ["k", "l"],
+  ["o", "n"],
+];
+
+console.log(undirectedPath(edges, "j", "m")); // true
+console.log(undirectedPath(edges, "k", "o")); // false
+```

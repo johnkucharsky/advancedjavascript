@@ -1,53 +1,100 @@
+---
+title: Advanced JavaScript Code Snippets
+description: A curated collection of JavaScript and TypeScript examples covering real-world problems, advanced techniques, and coding patterns often asked in interviews or used on the job.
+sidebarTitle: Getting started
+---
 
-# Getting Started
+# Advanced JavaScript Code Snippets
 
-Welcome to **Advanced Javascript** – a comprehensive collection of **JavaScript** and **TypeScript** cheatsheets.
-Explore practical examples covering syntax, algorithms, system design, and real coding problems — perfect for daily practice,
-interview preparation, or leveling up your **JS/TS** skills, all demonstrated with clear code snippets and descriptions.
+## Getting Started
 
-> This resource is **complementary** to excellent official documentation and learning platforms like [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript), [JavaScript.info](https://javascript.info/), and [react.dev](https://react.dev/).
+This guide is built from **real interview experiences** and **job tasks** — each section is structured to help you master advanced frontend topics efficiently.
+Master all of these topics to deeply understand how JavaScript works under the hood.
+
+💡 Leetcode problems are often made up and not that useful in practice — with two exceptions: **graph algorithms** and **system design**.
+Focus on concepts that *actually show up* in real interviews and jobs.
+
+Most importantly, if you don't understand how JavaScript works under the hood, Leetcode is just a waste of time —
+you're solving abstract puzzles without mastering the real engine behind your code.
+
+**Dive in, get hands-on, and build true confidence that lasts.**
+
+> 📌 This resource is **complementary** to excellent official documentation and learning platforms like
+> [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript), [JavaScript.info](https://javascript.info/), and [react.dev](https://react.dev/).
 > If you're just starting out, I highly recommend reading those resources **first** to build a solid foundation.
-> However, you can also begin with **Advanced Javascript** to explore examples in action, reinforce what you learn, or quickly reference key concepts while coding.
+> However, you can also begin with **Advanced JavaScript** to explore examples in action, reinforce what you learn, or quickly reference key concepts while coding.
 
-## 🧠 Fundamentals
+## 🧭 Graph Algorithms
 
-- Learn JS and MDN \
-A curated collection of practical **JavaScript** and **TypeScript** examples, from [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript) and [JavaScript.info](https://javascript.info/).
-Includes core features such as the **event loop**, **memoization**, **loops**, **recursion**, **context binding**, **decorators**, and **async generators**
+Fundamental graph traversal logic used in system design and coding challenges.
 
-- JS Native \
-Reimplementation of native **JavaScript** methods, built-in features, and low-level behavior — understand how they work under the hood.
+- `Graph Traversal` – **BFS**, **DFS**, adjacency lists, graph algorithms.
 
-- Theory \
-Covers deep-dive programming concepts like composition vs inheritance, the call stack, functional patterns, SOLID principles,
-and detailed examples of type conversions, operator behavior, and equality comparisons in JavaScript.
+## 📦 JS Native
 
-## 🏗️ System Design & Architecture
+Deep dive into native JavaScript methods and behavior. Each section includes polyfills ( custom implementation ),
+explanations and all possible use cases.
 
-- System Design and Patterns \
-Explore **JavaScript** implementations of system design concepts: queues, stacks, reducers, async workflows, and more.
+- `Map` – Map, WeakMap, Map.groupBy.
+- `Mutating Methods` – concat, fill, pop, push, reverse, shift, unshift, splice.
+- `Promises` – Promise.all, race, any, allSettled.
+- `Read methods` – at, every, find, findIndex, findLast, includes, indexOf, some.
+- `Set and Object` – Set, Object.groupBy, Object.assign, Array.entries.
+- `Transform Methods` – filter, flat, flatMap, join, map, reduce, slice.
 
-- Graphs \
-Graph data structures, traversal algorithms, and visual patterns.
+## 📖 Learn JS and Mdn
 
-## 🔢 Algorithms & Utilities
+Essential learning topics pulled from MDN, Learn JS, interviews and my web dev job.
 
-- Sorting \
-Implementations of common sorting algorithms like quicksort, mergesort, and more.
+- `Advanced Patterns` – Memoize, Mixins, Promise Chaining, Promise Error Handling, Synchronous vs Asynchronous Errors in Promises, Proxy, Range Iterator, Shooters: Closures & Lexical Scope.
+- `Delay, Throttling and Debounce` – Delay Decorator, Delaying function execution, Output Every Second, setInterval, setTimeout, throttling and debounce decorator.
+- `Core Concepts` – Understanding this, Loop Behavior: Pre- / Post-Increment, Object and Map Conversion, bind, Async Generators, Fibonacci ( Iterative Approach, Recursive Approach ).
+- `Event Loop` – Event Loop edge cases — the **#1 most asked JavaScript interview topic**.
+- `This and Object Methods` – Nuances of `this` across different method contexts — the **#2 most asked JavaScript interview topic**.
 
-- Lodash \
-Handy utility functions using the **Lodash** library.
+## ⚙️ Lodash
+
+Utility functions from [lodash](https://lodash.com/).
+
+- `Chunk, Compact, Partition` – chunk, compact, partition.
+- `Difference, Intersection, Union` – difference, differenceBy, intersection, union.
+- `Object Utilities` – keyBy, omit, orderBy, pick, curry.
+
+## ⚛️ React
+
+React specific topics.
+
+- `React Rendering` – usePrevious, children.
+- `State Patterns` – Normalized State, useReducer ( custom implementation ).
+
+## 🧩 System Design
+
+System design concepts often seen in real interviews.
+
+- `Redux and Twitter` – Redux reducer pattern, most used pattern for state management in react. Twitter feed pattern.
+- `Queue and Stack` – Stacks and queues are core to how JavaScript works under the hood — and they show up in nearly every interview.
+
+## 🧠 Theory
+
+High-level principles and mental models.
+
+- `Composition vs Inheritance` - Composition, Inheritance and Function Stack.
+- `SOLID in React` - SOLID principles in React.
+- `Type Conversions` - Explore the magic behind JavaScript **type coercion** and equality checks.
+
+## 🔧 Utils
+
+Advanced utility functions and transformation logic — real-world inspired.
+
+- `Call, bind, apply` – Understanding `call`, `bind`, and `apply` is essential for mastering how JavaScript handles function context (`this`). **Often asked on interviews**.
+- `Dictionary of Nested` – Deeply nested array structure (e.g., categories → subcategories → items) into a dictionary format for **constant-time lookup** by `id`.
+- `Group List by Quarters` – Groups monthly financial data by calendar quarters.
+- `Transform Lists and Trees` – List to tree, tree to list, flat nested items.
+- `Promises Closures Event Loop` – Async behavior, state retention, and timing execution in complex JavaScript code.
+- `Sorting` – bubble sort, insertion sort, selection sort.
+- `Various Utilities` – clsx, contains duplicate, deep clone, filter by related property, filterMap, innerJoin, Reducer pattern with actions, Retry with exponential backoff, Shuffle (Fisher-Yates Algorithm), Topological Sort.
 
 
-## ⚛️ Frameworks & Tools
-
-React-focused code snippets covering concepts like `children`, rendering optimizations, state normalization, and hooks such
-as `useReducer` and `usePrevious`
-
-## 🧪 Various
-
-A diverse collection of **JavaScript** edge cases, patterns, and utilities — from mastering `call`, `bind`, and `apply` to deep cloning,
-recursive data transforms, closures, and event loop tricks.
 
 ## About Me
 

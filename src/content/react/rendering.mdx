@@ -1,0 +1,111 @@
+---
+title: React Concepts – usePrevious and children
+description: Learn about usePrevious custom hook, React children behavior, and how React reuses component instances for performance optimization. Includes practical examples with TypeScript.
+sidebarTitle: React Rendering
+---
+
+# React Concepts: `usePrevious`, `children`, and Component Optimization
+
+This guide explores useful React patterns including the `usePrevious` hook for tracking prior state values, and how React handles JSX `children` and
+component reuse — all with minimal, focused examples using TypeScript.
+
+## usePrevious
+
+The `usePrevious` custom hook allows you to track the previous value of a state variable in React.
+This hook leverages the `useRef` hook to store the previous value of a given state, and `useEffect`
+to update the ref value after the component has rendered. This approach makes it possible to access the
+value before the current one, which is useful for cases where you need to compare the previous and current values of a variable.
+
+In this example, the `usePrevious` hook tracks the previous count state value. The value of the `ref` is
+updated inside the `useEffect`, which runs after the component has rendered. The previous value is stored in the ref and is returned by the hook.
+
+```tsx filename="usePrevious" copy
+import { useState, useEffect, useRef } from "react";
+
+function usePrevious(value: string | number) {
+  const ref = useRef<string | number>();
+
+  useEffect(() => {
+    ref.current = value;
+    console.log("useEffect", ref.current);
+    return () => {
+      console.log("useEffect return");
+    };
+  }, [value]);
+
+  console.log({ ref: ref.current });
+
+  return ref.current;
+}
+
+function App() {
+  const [count, setCount] = useState(0);
+  console.log({ count });
+  const previousCount = usePrevious(count);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <p>Previous count: {previousCount}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+
+export default App;
+// initial render logs
+
+// {count: 0}
+// {ref: undefined}
+// useEffect 0
+// useEffect return
+// useEffect 0
+
+// consequent renders log
+
+// {count: 1}
+// {ref: 0}
+// useEffect return
+// useEffect 1
+```
+
+## children
+
+The [`children`](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children) concept in React
+refers to any child components or elements passed into a parent component. In this example, the `TestComponent`
+is rendered by the `TestWrapper` component, but React does not rerender `TestComponent` after clicking the button
+because the props have not changed. React reuses the same component instance as long as its props remain unchanged.
+
+This custom implementation demonstrates how React optimizes rendering by not rerendering `TestComponent` unless the
+props passed to it change, despite the state change in the parent component (`TestWrapper`).
+
+```tsx filename="children" copy
+import { ReactElement, useState } from "react";
+
+export default function App() {
+  return <TestWrapper prop={<TestComponent />} />;
+}
+
+function TestWrapper({ prop }: { prop: ReactElement }) {
+  const [bool, setBool] = useState(false);
+  console.log("TestWrapper");
+  return (
+    <>
+      <button onClick={() => setBool(!bool)}>click</button>
+      {prop}
+    </>
+  );
+}
+
+function TestComponent() {
+  console.log("TestComponent");
+  return <></>;
+}
+
+// initial render
+// TestWrapper
+// TestComponent
+
+// after click
+// TestWrapper
+```

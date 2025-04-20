@@ -1,0 +1,431 @@
+---
+title: JavaScript Utility Patterns – filterMap, clsx, deepClone, retry, shuffle, and more
+description: A collection of practical JavaScript utility patterns like clsx, deepClone, retry, topological sort, filter by related property, reducer pattern, and more. Helpful for real-world apps, interviews, and robust frontend logic.
+sidebarTitle: Various Utilities
+---
+
+# JavaScript Utility Functions and Patterns
+
+This catalog includes reusable JavaScript utilities and logic patterns that simplify development, avoid bugs, and promote cleaner code.
+These are useful in both real-world frontend projects and interviews.
+
+## clsx
+
+The `clsx` utility is commonly used to conditionally join class names in JavaScript and React projects.
+
+This custom implementation mimics the behavior of the [`clsx`](https://github.com/lukeed/clsx) library by:
+
+- Skipping falsy values (`false`, `null`, `undefined`, `0`, `""`, `NaN`)
+- Joining strings as-is
+- Recursively flattening arrays
+- Including keys from objects whose values are truthy
+
+This allows for clean, readable class name composition in UI code.
+
+
+```js filename="clsx" copy
+function clsx(...args) {
+  const classes = [];
+
+  for (const arg of args) {
+    // Skip the current iteration if the argument is falsy
+    if (!arg) continue;
+
+    if (typeof arg === "string") {
+      classes.push(arg);
+    } else if (Array.isArray(arg)) {
+      classes.push(clsx(...arg)); // Recursively process arrays
+    } else if (typeof arg === "object") {
+      for (const key in arg) {
+        if (arg[key]) {
+          classes.push(key); // Push key if value is truthy
+        }
+      }
+    }
+  }
+
+  return classes.join(" "); // Join classes with a space
+}
+
+console.log(
+  clsx("base-class", { active: true, disabled: false }, [
+    "additional-class",
+    "another-class",
+  ]),
+); // base-class active additional-class another-class
+console.log(
+  clsx(null, false, "bar", undefined, { baz: null }, "", [[[{ one: 1 }]]]),
+); // bar one
+```
+
+## contains duplicate
+
+This function checks if a given array contains any duplicate values.
+
+It uses a `Set` to track elements that have already been seen while iterating through the array.
+If a value is found in the `Set`, the function returns `true`, indicating a duplicate.
+If no duplicates are found by the end of iteration, it returns `false`.
+
+```js filename="containsDuplicate" copy
+function containsDuplicate(nums) {
+  const seen = new Set();
+
+  for (const num of nums) {
+    if (seen.has(num)) {
+      return true;
+    }
+
+    seen.add(num);
+  }
+
+  return false;
+}
+
+console.log(containsDuplicate([1, 1, 3, 4])); // true
+console.log(containsDuplicate([1, 3, 4])); // false
+```
+
+## deep clone
+
+The `deepClone` function recursively copies all levels of an object or array, creating a fully independent clone.
+This avoids shared references and ensures that changes to nested structures in the cloned object won’t affect the original.
+
+It handles:
+- Primitive types and `null`
+- Arrays using recursive `map`
+- Plain objects using recursive property traversal
+
+Perfect for deep copying JSON-compatible data without using `JSON.parse(JSON.stringify(...))`,
+which fails on special types like `Date`, `Map`, `Set`, or circular references.
+
+```js filename="deepClone" copy
+function deepClone(obj) {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    // Recursively clone array elements
+    return obj.map(deepClone);
+  }
+
+  const clonedObj = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      // Recursively clone object properties
+      clonedObj[key] = deepClone(obj[key]);
+    }
+  }
+
+  return clonedObj;
+}
+
+const obj = { a: 1, b: [{ c: 2, d: 3 }] };
+const clonedObj = deepClone(obj);
+console.log(clonedObj); // { a: 1, b: [ { c: 2, d: 3 } ] }
+```
+
+## filter by related property
+
+This utility filters a list of objects based on a **related property** found in another array — similar to a **join + filter** operation.
+
+In this example, we filter items in the `objects` array based on the `class` value of their related `object_type`, which is matched against the `object_types` array.
+
+Highlights:
+- `groupBy()` helps group `object_types` by `class` for fast lookup.
+- `filterObjectsByClass()` efficiently filters items by matching related object type's class.
+- Uses TypeScript generics for reusability and type safety.
+
+```ts filename="filter by related" copy
+const objects = [
+  { id: 1, name: "Test 1", object_type: 1 },
+  { id: 2, name: "Test 2", object_type: 1 },
+  { id: 3, name: "Test 3", object_type: 2 },
+  { id: 4, name: "Test 4", object_type: 3 },
+];
+
+const object_types = [
+  { id: 1, class: "orange" },
+  { id: 2, class: "orange" },
+  { id: 3, class: "apple" },
+  { id: 4, class: "cheese" },
+];
+
+const groupBy = <T, K extends string | number | symbol>(
+  arr: T[],
+  callback: (item: T) => K,
+): Record<K, T[]> => {
+  return arr.reduce(
+    (acc: Record<K, T[]>, item: T) => {
+      const key = callback(item);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+
+      return acc;
+    },
+    {} as Record<K, T[]>,
+  );
+};
+
+const filterObjectsByClass = <T>(
+  cls: string,
+  objects: (T & { object_type: number })[],
+  objectTypes: { id: number; class: string }[],
+): T[] => {
+  const result: T[] = [];
+
+  const objTypesByClass = groupBy(
+    objectTypes,
+    (item) => item.class,
+  );
+
+  for (const item of objects) {
+    if (
+      objTypesByClass[cls].find(
+        (objectType) => objectType.id === item.object_type,
+      )
+    ) {
+      result.push(item);
+    }
+  }
+
+  return result;
+};
+
+const filteredObjects = filterObjectsByClass(
+  "orange",
+  objects,
+  object_types,
+);
+console.log(filteredObjects);
+
+// [
+//   { id: 1, name: 'Test 1', object_type: 1 },
+//   { id: 2, name: 'Test 2', object_type: 1 },
+//   { id: 3, name: 'Test 3', object_type: 2 }
+// ]
+```
+
+## filterMap
+
+The `filterMap()` utility combines filtering and mapping into a single `reduce()` pass — making it more efficient than chaining `.filter().map()`.
+
+This function takes:
+- an `array`,
+- a `filterBoolean` function to determine which elements to include,
+- and a `mapCallback` to transform each included item.
+
+```js filename="filterMap" copy
+export const filterMap = (array, filterBoolean, mapCallback) => {
+  return array.reduce((acc, item, idx) => {
+    if (filterBoolean(item)) {
+      acc.push(mapCallback(item, idx));
+    }
+    return acc;
+  }, []);
+};
+
+const people = [
+  { name: "Alice", age: 25, active: true },
+  { name: "Bob", age: 30, active: false },
+  { name: "Charlie", age: 35, active: true },
+];
+
+const activeNames = filterMap(
+  people,
+  (person) => person.active,
+  (person) => person.name,
+);
+
+console.log(activeNames); // ['Alice', 'Charlie']
+```
+
+## innerJoin
+
+Implements a basic [`innerJoin`](https://ramdajs.com/docs/#innerJoin) function for
+arrays — similar to SQL inner joins. This method takes a `predicate`, a list of `records`, and a list of `ids`.
+It returns all records where the predicate returns true for at least one ID.
+
+This approach is helpful for:
+- Matching entities across two datasets
+- Resolving references between relational data
+- Filtering records based on foreign key relations
+
+The example joins musician records by matching their `id` with an array of selected IDs.
+
+```js filename="innerJoin" copy
+function innerJoin(predicate, records, ids) {
+  return records.filter((record) => ids.some((id) => predicate(record, id)));
+}
+
+const result = innerJoin(
+  (record, id) => record.id === id,
+  [
+    { id: 824, name: "Richie Furay" },
+    { id: 956, name: "Dewey Martin" },
+    { id: 313, name: "Bruce Palmer" },
+    { id: 456, name: "Stephen Stills" },
+    { id: 177, name: "Neil Young" },
+  ],
+  [177, 456, 999],
+);
+
+console.log(result);
+// [{id: 456, name: 'Stephen Stills'}, {id: 177, name: 'Neil Young'}]
+```
+
+## Reducer pattern with actions
+
+This example demonstrates the use of a reducer function similar to the pattern used in React’s `useReducer`.
+The reducer function handles different types of actions (`added`, `changed`, `deleted`) to manage a list of tasks.
+It accumulates state changes over time as actions are applied via
+[`Array.prototype.reduce`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce),
+making it a powerful pattern for predictable state updates in complex logic flows.
+
+```js filename="reducer" copy
+function tasksReducer(tasks, action) {
+  switch (action.type) {
+    case "added": {
+      return [
+        ...tasks,
+        {
+          id: action.id,
+          text: action.text,
+          done: false,
+        },
+      ];
+    }
+    case "changed": {
+      return tasks.map((t) => {
+        if (t.id === action.id) {
+          const { type, ...actionNoType } = action;
+          return actionNoType;
+        } else {
+          return t;
+        }
+      });
+    }
+    case "deleted": {
+      return tasks.filter((t) => t.id !== action.id);
+    }
+    default: {
+      throw Error("Unknown action: " + action.type);
+    }
+  }
+}
+
+const initialState = [];
+const actions = [
+  { type: "added", id: 1, text: "Visit Kafka Museum" },
+  { type: "added", id: 2, text: "Watch a puppet show" },
+  { type: "deleted", id: 1 },
+  { type: "added", id: 3, text: "Lennon Wall pic" },
+  { type: "changed", id: 3, text: "Lennon Wall", done: true },
+];
+const finalState = actions.reduce(tasksReducer, initialState);
+console.log(finalState);
+// [
+//     { id: 2, text: 'Watch a puppet show', done: false },
+//     { id: 3, text: 'Lennon Wall', done: true }
+// ]
+```
+
+## Retry with exponential backoff
+
+This snippet demonstrates how to implement a retry mechanism when fetching data from an API.
+It attempts to fetch the resource multiple times (up to a given `retries` limit) and waits a specified `delay` between each retry.
+If the request ultimately fails, it throws an error. This is particularly useful for handling flaky network requests
+or ensuring robustness when dealing with unstable APIs.
+
+```js filename="fetchWithRetry" copy
+async function fetchWithRetry(url, retries, delay = 1000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error);
+
+      if (attempt === retries) {
+        throw new Error(`Failed to fetch after ${retries} retries`);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+const res = await fetchWithRetry("https://pokeapi.co/api/v2/pokemon-color", 3);
+console.log(res);
+```
+
+## Shuffle (Fisher-Yates Algorithm)
+
+This example implements the [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher–Yates_shuffle),
+a reliable way to randomly shuffle elements in an array.
+The algorithm works by iterating the array from the end to the beginning,
+swapping the current element with a randomly selected one from earlier in the array (or itself).
+It ensures a uniform distribution of permutations.
+
+```js filename="shuffle" copy
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+const shuffledArray = [1, 2, 3, 4, 5];
+shuffle(shuffledArray);
+console.log(shuffledArray); // [ 2, 1, 4, 5, 3 ]
+```
+
+## Topological Sort
+
+This example performs a [topological sort](https://en.wikipedia.org/wiki/Topological_sorting) on a set of items with dependencies.
+Each item can only appear in the result after all of its dependencies are resolved.
+It’s a common algorithm used in build systems, task schedulers, and dependency resolution tools.
+
+```js filename="topological sort" copy
+const cards = [
+  { id: 1, dependent: [6, 7, 8] },
+  { id: 2, dependent: [6] },
+  { id: 3, dependent: [] },
+  { id: 4, dependent: [6, 7, 8] },
+  { id: 5, dependent: [6, 8] },
+  { id: 6, dependent: [] },
+  { id: 7, dependent: [6] },
+  { id: 8, dependent: [7] },
+  { id: 9, dependent: [1] },
+  { id: 10, dependent: [9] },
+];
+
+const getOrderedCards = (cards) => {
+  const result = [];
+  const added = new Set();
+
+  while (result.length < cards.length) {
+    for (const card of cards) {
+      if (
+        !added.has(card.id) &&
+        card.dependent.every((dep) => added.has(dep))
+      ) {
+        result.push(card.id);
+        added.add(card.id);
+      }
+    }
+  }
+
+  return result;
+};
+
+console.log(getOrderedCards(cards));
+// [
+//   3, 6, 7, 8,  1,
+//   2, 4, 5, 9, 10
+// ]
+```

@@ -1,0 +1,357 @@
+---
+title: Mutating JavaScript Array Methods – Custom Polyfills
+description: Custom implementations of JavaScript array methods that modify the original array, including push(), pop(), splice(), fill(), reverse(), and more. Great for deep understanding and interview prep.
+sidebarTitle: Mutating Methods
+---
+
+# Custom Polyfills for Mutating JavaScript Array Methods
+
+These array methods modify the original array in-place. This page includes custom polyfill implementations of JavaScript mutating methods
+like `push()`, `pop()`, `splice()`, `fill()`, `reverse()`, and more — perfect for understanding how they work internally.
+
+## Array.concat
+
+The [`concat()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat) method
+merges two or more arrays and returns a **new array** without modifying the original.
+It also handles non-array values by appending them as-is. This custom implementation replicates native behavior by
+flattening one level of array input while preserving nested structures.
+
+```js filename="concat" copy
+Array.prototype.myConcat = function (...arrays) {
+  const result = [...this];
+
+  for (const array of arrays) {
+    if (Array.isArray(array)) {
+      result.push(...array);
+    } else {
+      result.push(array);
+    }
+  }
+
+  return result;
+};
+
+const arr = [1, 2, 3];
+const arr2 = [4, 5, 6, [1]];
+const arr3 = [7, 8, 9];
+const concat = arr.myConcat(arr2, arr3, 10);
+console.log(concat);
+// [1, 2, 3, 4, 5, 6, [1], 7, 8, 9, 10]
+```
+
+## Array.fill
+
+The [`fill()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fill)
+method changes all elements in an array between the specified `start` and `end` indices to a **static value**, in place.
+It returns the **modified array** and is useful for quickly initializing or resetting arrays.
+
+This example includes a custom implementation of `Array.prototype.fill()` with support for negative indices.
+
+```js filename="fill" copy
+Array.prototype.customFill = function (value, start = 0, end = this.length) {
+  if (start < 0) {
+    start = this.length + start;
+  }
+
+  if (end < 0) {
+    end = this.length + end;
+  }
+
+  for (let i = start; i < Math.min(end, this.length); i++) {
+    this[i] = value;
+  }
+
+  return this;
+};
+
+const array1 = [1, 2, 3, 4];
+
+// Fill with 0 from position 2 until position 4
+console.log(array1.customFill(0, 2, 4));
+// [1, 2, 0, 0]
+
+// Fill with 5 from position 1
+console.log(array1.customFill(5, 1));
+// [1, 5, 5, 5]
+
+console.log(array1.customFill(6));
+// [6, 6, 6, 6]
+
+console.log([1, 2, 3].customFill(4)); // [4, 4, 4]
+console.log([1, 2, 3].customFill(4, 1)); // [1, 4, 4]
+console.log([1, 2, 3].customFill(4, 1, 2)); // [1, 4, 3]
+console.log([1, 2, 3].customFill(4, 1, 1)); // [1, 2, 3]
+console.log([1, 2, 3].customFill(4, 3, 3)); // [1, 2, 3]
+console.log([1, 2, 3].customFill(4, -3, -2)); // [4, 2, 3]
+```
+
+## Array.pop
+
+The [`pop()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop)
+method removes the **last element** from an array and returns it. It mutates the original array by reducing its length by one.
+
+This example provides a custom implementation of `Array.prototype.pop()` that replicates native behavior.
+
+```js filename="pop" copy
+Array.prototype.customPop = function () {
+  const length = this.length;
+
+  if (length === 0) {
+    return undefined;
+  }
+
+  const lastElement = this[length - 1];
+  this.length = length - 1;
+
+  return lastElement;
+};
+
+const fruits = ["Apple", "Banana", "Cherry"];
+const lastFruit = fruits.customPop();
+console.log(lastFruit); // Cherry
+console.log(fruits); // [ "Apple", "Banana" ]
+```
+
+## Array.push
+
+The [`push()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push)
+method adds one or more elements to the **end of an array** and returns the **new length** of the array.
+It's a common and efficient way to grow an array in-place.
+
+This example demonstrates a custom implementation of `Array.prototype.push()` that handles multiple arguments and mimics native behavior.
+
+```js filename="push" copy
+Array.prototype.customPush = function () {
+  for (let i = 0; i < arguments.length; i++) {
+    this[this.length] = arguments[i];
+  }
+
+  return this.length;
+};
+
+const animals = ["pigs", "goats"];
+
+const count = animals.customPush("cows");
+console.log(count); // 3
+
+console.log(animals); // [ 'pigs', 'goats', 'cows' ]
+
+animals.customPush("chickens", "cats");
+console.log(animals);
+// [ 'pigs', 'goats', 'cows', 'chickens', 'cats' ]
+```
+
+## Array.reverse
+
+The [`reverse()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reverse)
+method reverses an array **in place** and returns the **modified array**.
+The first element becomes the last, and the last becomes the first, effectively reversing the array's order.
+
+This custom implementation of `Array.prototype.reverse()` reverses the array elements by swapping them in place.
+
+```js filename="reverse" copy
+Array.prototype.customReverse = function () {
+  const middle = Math.floor(this.length / 2);
+
+  for (let i = 0; i < middle; i++) {
+    const temp = this[i];
+    this[i] = this[this.length - 1 - i];
+    this[this.length - 1 - i] = temp;
+  }
+
+  return this;
+};
+
+const array1 = ["one", "two", "three", "four"];
+
+const reversed = array1.customReverse();
+console.log(reversed); // [ 'four', 'three', 'two', 'one' ]
+// reverse changes the original array
+console.log(array1); // [ 'four', 'three', 'two', 'one' ]
+```
+
+## Array.shift
+
+The [`shift()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift) method removes the **first element** from an array and returns it,
+shifting the remaining elements down. This method mutates the array by reducing its length.
+
+This custom implementation of `Array.prototype.shift()` manually shifts the array elements and returns the removed first element.
+
+```js filename="shift" copy
+Array.prototype.customShift = function () {
+  if (!this.length) return;
+
+  const firstElement = this[0];
+
+  for (let i = 0; i < this.length; i++) {
+    this[i] = this[i + 1];
+  }
+
+  this.length -= 1;
+
+  return firstElement;
+};
+
+const array1 = [1, 2, 3];
+
+const firstElement = array1.customShift();
+
+console.log(array1); // [2, 3]
+console.log(firstElement); // 1
+```
+
+## Array.unshift
+
+The [`unshift()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift) method adds one or more elements to the **beginning** of an array and returns the **new length** of the array.
+
+In this custom implementation, the method first shifts all existing elements to the right to make space for the new elements.
+Then, it inserts the new elements at the beginning of the array and returns the updated length.
+
+```js filename="shift" copy
+Array.prototype.unshift = function (...elements) {
+  const originalLength = this.length;
+  const totalLength = elements.length + originalLength;
+
+  // Shift existing elements to the right
+  for (let i = originalLength - 1; i >= 0; i--) {
+    this[i + elements.length] = this[i];
+  }
+
+  // Add new elements at the beginning
+  for (let i = 0; i < elements.length; i++) {
+    this[i] = elements[i];
+  }
+
+  return totalLength; // Return the new length
+};
+
+const arr = [3, 4, 5];
+arr.unshift(1, 2);
+console.log(arr); // [1, 2, 3, 4, 5]
+console.log(arr.length); // 5
+```
+
+## Array.splice
+
+The [`splice()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice)
+method changes the contents of an array by **removing or replacing** existing elements and/or adding new elements in place.
+
+This custom implementation of `Array.prototype.splice()` handles negative indices, normalization of `deleteCount`,
+and array modification in place, while returning the removed elements.
+
+```js filename="splice" copy
+Array.prototype.customSplice = function (
+  startIndex,
+  deleteCount,
+  ...itemsToAdd
+) {
+  const length = this.length;
+
+  // Handle negative indices
+  startIndex =
+    startIndex < 0
+      ? Math.max(length + startIndex, 0)
+      : Math.min(startIndex, length);
+
+  // If deleteCount is undefined, remove all elements starting from startIndex
+  if (deleteCount === undefined) {
+    deleteCount = length - startIndex;
+  } else {
+    // Normalize deleteCount
+    deleteCount = Math.max(0, Math.min(deleteCount, length - startIndex));
+  }
+
+  // Extract the array to be deleted
+  const splicedItems = this.slice(startIndex, startIndex + deleteCount);
+
+  // Create the resulting this by combining parts and items to add
+  const remainingItems = [
+    ...this.slice(0, startIndex),
+    ...itemsToAdd,
+    ...this.slice(startIndex + deleteCount),
+  ];
+
+  // Update the original array
+  this.length = 0; // Clear the this
+  for (let i = 0; i < remainingItems.length; i++) {
+    this[i] = remainingItems[i];
+  }
+
+  // Return the deleted items
+  return splicedItems;
+};
+
+// Remove 0 (zero) elements before index 2, and insert "drum"
+const myFish = ["angel", "clown", "mandarin", "sturgeon"];
+const removed = myFish.customSplice(2, 0, "drum");
+console.log({ myFish, removed });
+// myFish: [ 'angel', 'clown', 'drum', 'mandarin', 'sturgeon' ]
+// removed: []
+
+// Remove 0 (zero) elements before index 2, and insert "drum" and "guitar"
+const myFish1 = ["angel", "clown", "mandarin", "sturgeon"];
+const removed1 = myFish1.customSplice(2, 0, "drum", "guitar");
+console.log({ myFish1, removed1 });
+// myFish1: [ 'angel', 'clown', 'drum', 'guitar', 'mandarin', 'sturgeon' ],
+// removed1: []
+
+// Remove 0 (zero) elements at index 0, and insert "angel"
+// splice(0, 0, ...elements) inserts elements at the start of
+// the array like unshift().
+const myFish2 = ["clown", "mandarin", "sturgeon"];
+const removed2 = myFish2.customSplice(0, 0, "angel");
+console.log({ myFish2, removed2 });
+// myFish2: [ 'angel', 'clown', 'mandarin', 'sturgeon' ], removed2: []
+
+// Remove 0 (zero) elements at last index, and insert "sturgeon"
+// splice(array.length, 0, ...elements) inserts elements at the
+// end of the array like push().
+const myFish3 = ["angel", "clown", "mandarin"];
+const removed3 = myFish3.customSplice(myFish.length, 0, "sturgeon");
+console.log({ myFish3, removed3 });
+// myFish3: [ 'angel', 'clown', 'mandarin', 'sturgeon' ], removed3: []
+
+// Remove 1 element at index 3
+const myFish4 = ["angel", "clown", "drum", "mandarin", "sturgeon"];
+const removed4 = myFish4.customSplice(3, 1);
+console.log({ myFish4, removed4 });
+// myFish4: [ 'angel', 'clown', 'drum', 'sturgeon' ],
+// removed4: [ 'mandarin' ]
+
+// Remove 1 element at index 2, and insert "trumpet"
+const myFish5 = ["angel", "clown", "drum", "sturgeon"];
+const removed5 = myFish5.customSplice(2, 1, "trumpet");
+console.log({ myFish5, removed5 });
+// myFish5: [ 'angel', 'clown', 'trumpet', 'sturgeon' ],
+// removed5: [ 'drum' ]
+
+// Remove 2 elements from index 0, and insert "parrot", "anemone" and "blue"
+const myFish6 = ["angel", "clown", "trumpet", "sturgeon"];
+const removed6 = myFish6.customSplice(0, 2, "parrot", "anemone", "blue");
+console.log({ myFish6, removed6 });
+// myFish6: [ 'parrot', 'anemone', 'blue', 'trumpet', 'sturgeon' ],
+// removed6: [ 'angel', 'clown' ]
+
+// Remove 2 elements, starting from index 2
+const myFish7 = ["parrot", "anemone", "blue", "trumpet", "sturgeon"];
+const removed7 = myFish7.customSplice(2, 2);
+console.log({ myFish7, removed7 });
+// myFish7: [ 'parrot', 'anemone', 'sturgeon' ],
+// removed7: [ 'blue', 'trumpet' ]
+
+// Remove 1 element from index -2
+const myFish8 = ["angel", "clown", "mandarin", "sturgeon"];
+const removed8 = myFish8.customSplice(-2, 1);
+console.log({ myFish8, removed8 });
+// myFish8: [ 'angel', 'clown', 'sturgeon' ], removed8: [ 'mandarin' ]
+
+// Remove all elements, starting from index 2
+const myFish9 = ["angel", "clown", "mandarin", "sturgeon"];
+const removed9 = myFish9.customSplice(2);
+console.log({ myFish9, removed9 });
+// myFish9: [ 'angel', 'clown' ], removed9: [ 'mandarin', 'sturgeon' ]
+```
+
+
+
+

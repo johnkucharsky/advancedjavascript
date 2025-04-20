@@ -1,0 +1,253 @@
+---
+title: React State Patterns – Normalized State and useReducer Hook
+description: Learn how to manage complex React state using normalized structures and the useReducer hook. Includes examples for recursive state updates and reducer-based messaging logic in TypeScript.
+sidebarTitle: State Patterns
+---
+
+# React State Patterns: Normalized State and `useReducer`
+
+Managing state in complex React applications can be simplified using two powerful patterns: **normalized state** and the **`useReducer` hook**.
+This guide demonstrates how to structure deeply nested data for easier updates and how to use reducers to manage state transitions cleanly and predictably.
+
+## Normalized State
+
+The concept of **normalized state** is commonly used in managing complex data structures, such as nested objects or arrays,
+in a way that makes it easier to update and manage state in applications. This approach involves flattening the structure into
+a more accessible format, often using an object with unique IDs as keys, and maintaining relationships between the entities via arrays of IDs (as seen in `childIds`).
+
+In this example, the `TravelPlanComponent` component simulates a travel planning system where each location (node) has a
+title and a set of child locations (nested nodes). The `normalized state` design keeps all the locations in a flat object,
+and relationships between locations are managed using the `childIds` array.
+
+The `removeNodeAndChildren` function recursively removes a node and its children from the state, and `handleComplete` ensures
+that a child node is removed from its parent node’s `childIds`. This architecture makes it easier to update and delete nodes
+or manage complex state in React applications, especially with deep nested structures.
+
+```tsx filename="Normalized State" copy
+import { useState } from "react";
+
+type TravelNode = {
+  id: number;
+  title: string;
+  childIds: number[];
+};
+
+type TravelPlan = {
+  [key: number]: TravelNode;
+};
+
+const initialTravelPlan: TravelPlan = {
+  0: { id: 0, title: "(Root)", childIds: [1, 42] },
+  1: { id: 1, title: "Earth", childIds: [2, 10] },
+  2: { id: 2, title: "Africa", childIds: [3, 4, 5] },
+  3: { id: 3, title: "Botswana", childIds: [] },
+  4: { id: 4, title: "Egypt", childIds: [] },
+  5: { id: 5, title: "Kenya", childIds: [] },
+  10: { id: 10, title: "Americas", childIds: [11, 12, 13] },
+  11: { id: 11, title: "Argentina", childIds: [] },
+  12: { id: 12, title: "Brazil", childIds: [] },
+  13: { id: 13, title: "Barbados", childIds: [] },
+  42: { id: 42, title: "Moon", childIds: [43, 44, 45] },
+  43: { id: 43, title: "Rheita", childIds: [] },
+  44: { id: 44, title: "Piccolomini", childIds: [] },
+  45: { id: 45, title: "Tycho", childIds: [] },
+};
+
+export default function TravelPlanComponent() {
+  const [travelPlan, setTravelPlan] = useState<TravelPlan>(initialTravelPlan);
+
+  const removeNodeAndChildren = (id: number, plan: TravelPlan): TravelPlan => {
+    const newPlan = { ...plan };
+
+    const removeRecursively = (nodeId: number) => {
+      const node = newPlan[nodeId];
+      if (!node) return;
+
+      // Remove all children recursively
+      node.childIds.forEach(removeRecursively);
+
+      // Delete the current node
+      delete newPlan[nodeId];
+    };
+
+    removeRecursively(id);
+    return newPlan;
+  };
+
+  const handleComplete = (id: number, parentId: number) => {
+    setTravelPlan((prevPlan) => {
+      const updatedPlan = removeNodeAndChildren(id, prevPlan);
+
+      // Remove the child from the parent's childIds array
+
+      updatedPlan[parentId] = {
+        ...updatedPlan[parentId],
+        childIds: updatedPlan[parentId].childIds.filter(
+          (childId) => childId !== id,
+        ),
+      };
+
+      return updatedPlan;
+    });
+  };
+
+  return (
+    <div>
+      {travelPlan[0].childIds.map((childId) => (
+        <RenderPlace
+          key={childId}
+          id={childId}
+          parentId={travelPlan[0].id}
+          travelPlan={travelPlan}
+          handleComplete={handleComplete}
+        />
+      ))}
+    </div>
+  );
+}
+
+const RenderPlace = ({
+  id,
+  parentId,
+  handleComplete,
+  travelPlan,
+}: {
+  id: number;
+  parentId: number;
+  handleComplete: (id: number, parentId: number) => void;
+  travelPlan: TravelPlan;
+}) => {
+  const node = travelPlan[id];
+
+  if (!node) return null;
+
+  return (
+    <ol style={{ paddingInlineStart: 0 }}>
+      <li
+        style={{
+          display: "flex",
+          gap: "1rem",
+          alignItems: "center",
+        }}
+      >
+        <h5
+          style={{
+            marginBlockStart: 5,
+            marginBlockEnd: 5,
+          }}
+        >
+          {node.title}
+        </h5>
+        <button onClick={() => handleComplete(node.id, parentId)}>
+          Complete
+        </button>
+      </li>
+      {node.childIds.length > 0 && (
+        <ol>
+          {node.childIds.map((childId) => (
+            <li key={childId}>
+              <RenderPlace
+                id={childId}
+                parentId={node.id}
+                travelPlan={travelPlan}
+                handleComplete={handleComplete}
+              />
+            </li>
+          ))}
+        </ol>
+      )}
+    </ol>
+  );
+};
+```
+
+## useReducer
+
+The `useReducer` hook is a more advanced alternative to `useState` for managing complex state logic in React.
+It allows you to handle state transitions using a reducer function, similar to how Redux works. `useReducer`
+is especially useful when the state depends on previous state values or involves more complex state updates.
+
+In this example, `useReducer` is used to manage a collection of messages. The `messengerReducer` function defines
+the logic for adding and removing messages. The reducer receives the current state and an action, then returns the updated state based on the action type.
+
+The `useReducer` hook returns the current state and a dispatch function to trigger state updates. The state is updated
+when a button is clicked, either to add a new message or remove the last message.
+
+```tsx filename="useReducer" copy
+import { useState } from "react";
+
+type Messages = Record<number, string>;
+
+type Action =
+  | { type: "add_message"; message: string }
+  | { type: "remove_last_message" };
+
+const initialState: Messages = {
+  0: "Hello, Taylor",
+  1: "Hello, Alice",
+  2: "Hello, Bob",
+};
+
+function useReducer<S, A>(
+  reducer: (state: S, action: A) => S,
+  initialState: S,
+): [S, (action: A) => void] {
+  const [state, setState] = useState<S>(initialState);
+
+  function dispatch(action: A) {
+    const nextState = reducer(state, action);
+    setState(nextState);
+  }
+
+  return [state, dispatch];
+}
+
+function messengerReducer(state: Messages, action: Action): Messages {
+  switch (action.type) {
+    case "add_message": {
+      const nextId = Math.max(0, ...Object.keys(state).map(Number)) + 1;
+      return {
+        ...state,
+        [nextId]: action.message,
+      };
+    }
+    case "remove_last_message": {
+      const ids = Object.keys(state).map(Number);
+      if (ids.length === 0) return state;
+      const lastId = Math.max(...ids);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [lastId]: _, ...rest } = state;
+      return rest;
+    }
+    default:
+      throw new Error("Unknown action: " + (action as Action).type);
+  }
+}
+
+export default function App() {
+  const [messages, dispatch] = useReducer<Messages, Action>(
+    messengerReducer,
+    initialState,
+  );
+
+  return (
+    <div>
+      <ul>
+        {Object.entries(messages).map(([id, message]) => (
+          <li key={id}>{message}</li>
+        ))}
+      </ul>
+      <button
+        onClick={() =>
+          dispatch({ type: "add_message", message: "New Message" })
+        }
+      >
+        Add Message
+      </button>
+      <button onClick={() => dispatch({ type: "remove_last_message" })}>
+        Remove Last Message
+      </button>
+    </div>
+  );
+}
+```

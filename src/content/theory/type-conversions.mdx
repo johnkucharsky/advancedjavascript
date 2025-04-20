@@ -1,13 +1,21 @@
+---
+title: JavaScript Type Conversions – Coercion, Comparisons, and Equality
+description: Understand how JavaScript handles type coercion in arithmetic, comparisons, and equality checks. Explore examples with null, undefined, strings, and booleans to master implicit conversions.
+sidebarTitle: Type Conversions
+---
 
-## type conversions
+# JavaScript Type Conversions and Coercion Rules
+
+JavaScript automatically converts values between types in many situations — a behavior known as **type coercion**. This guide helps you master how operators
+like `+`, `-`, comparisons (`<`, `>`, `==`, `===`), and more behave when mixing strings, numbers, booleans, `null`, and `undefined`.
 
 [Operator precedence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_precedence)
 
-### plus
+## plus
 
 Concatenates strings
 
-```js
+```js filename="plus" copy
 const log = (value) => console.log(value);
 
 log(null + 1); // 1
@@ -27,11 +35,11 @@ log(1 + "s"); // "1s"
 log(1 + "1"); // "11"
 ```
 
-### minus
+## minus
 
 Behaves like other operators, converts to numbers
 
-```js
+```js filename="minus" copy
 const log = (value) => console.log(value);
 
 log(null - 1); // -1
@@ -51,12 +59,11 @@ log(1 - "s"); // NaN
 log(1 - "1"); // 0
 ```
 
-### comparisons
+## comparisons
 
-When comparing values of different types,
-they convert to numbers
+When comparing values of different types, they convert to numbers
 
-```js
+```js filename="comparisons" copy
 const log = (value) => console.log(value);
 
 log(null < 1); // true
@@ -85,11 +92,11 @@ log("break");
 log("0" >= 0); // true
 ```
 
-### equality
+## equality
 
 Strict equality === doesn't convert values
 
-```js
+```js filename="== and ===" copy
 const log = (value) => console.log(value);
 
 log(null == null); // true
@@ -111,9 +118,9 @@ log(undefined === null); // false
 log([] === []); // false
 ```
 
-### random conversions
+## random conversions
 
-```js
+```js filename="random conversions" copy
 const log = (value) => console.log(value);
 
 log("10" + 2 * "5"); // 1010

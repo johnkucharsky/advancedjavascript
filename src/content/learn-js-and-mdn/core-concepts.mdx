@@ -1,0 +1,222 @@
+---
+title: JavaScript Core Concepts - this, bind, loops, generators, and more
+description: Learn foundational JavaScript concepts through practical code snippets, including `this` context, binding, async generators, loop behavior, and object-to-map conversions.
+sidebarTitle: Core Concepts
+---
+
+# JavaScript Core Concepts – this, bind, loops, generators, and more
+
+A curated collection of essential JavaScript concepts often asked about in interviews and critical for writing robust code.
+Each topic is backed by practical examples, real-world context, and explanations that help you **understand how and why** things work —
+not just memorize syntax.
+
+## Understanding this
+
+Below `users.customFilterNoThis(army.canJoin)`, throws, `army.canJoin` was called
+as a standalone function, with `this=undefined`, thus leading to an instant error.
+A call to `users.customFilter(army.canJoin, army)` can be replaced with
+`users.customFilterNoThis(user => army.canJoin(user))`, that does the same.
+This is an object before dot
+
+```js filename="this" copy
+Array.prototype.customFilter = function (callback, thisArg) {
+  let result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    if (callback.call(thisArg, this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+
+  return result;
+};
+
+Array.prototype.customFilterNoThis = function (callback) {
+  let result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    if (callback(this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+
+  return result;
+};
+
+const army = {
+  minAge: 18,
+  maxAge: 27,
+  canJoin(user) {
+    return user.age >= this.minAge && user.age < this.maxAge;
+  },
+};
+
+const users = [{ age: 16 }, { age: 20 }, { age: 23 }, { age: 30 }];
+
+const soldiers1 = users.customFilterNoThis(army.canJoin);
+// return user.age >= this.minAge && user.age < this.maxAge;
+// TypeError: Cannot read properties of undefined (reading 'minAge')
+const soldiers2 = users.customFilterNoThis((user) => army.canJoin(user));
+const soldiers3 = users.customFilter(army.canJoin, army);
+
+console.log(soldiers2); // [ { age: 20 }, { age: 23 } ]
+console.log(soldiers3); // [ { age: 20 }, { age: 23 } ]
+```
+
+## Loop Behavior: Pre/Post Increment
+
+This example highlights the subtle differences between `++i` (pre-increment) and `i++` (post-increment) in `while` loops, and how they affect loop behavior and output.
+
+It also compares `for` loops using `i++` vs `++i`, which behave the same in this context, since the increment happens after the loop body executes.
+
+```js filename="for vs while" copy
+let i = 0;
+while (++i < 3) console.log(i);
+// 1, 2
+
+let i2 = 0;
+while (i2++ < 3) console.log(i2);
+// 1, 2, 3
+
+for (let i = 0; i < 3; i++) console.log(i);
+// 0, 1, 2
+
+for (let i = 0; i < 3; ++i) console.log(i);
+// 0, 1, 2
+```
+
+
+## Object and Map Conversion
+
+This example shows how to convert between plain JavaScript objects and `Map` instances using `Object.entries()` and `Object.fromEntries()`.
+
+These methods are useful when working with APIs or libraries that prefer one format over the other, or when you need key ordering and additional `Map` features.
+
+```js filename="Object to Map" copy
+const prices = Object.fromEntries([
+  ["banana", 1],
+  ["orange", 2],
+  ["meat", 4],
+]);
+
+console.log(prices);
+// { banana: 1, orange: 2, meat: 4 }
+
+const map = new Map();
+map.set("banana", 1);
+map.set("orange", 2);
+map.set("meat", 4);
+
+const arrayLikeMapEntries = map.entries();
+const arrayMapEntries = Array.from(arrayLikeMapEntries);
+
+const objectFromMap = Object.fromEntries(arrayMapEntries);
+console.log(objectFromMap);
+// { banana: 1, orange: 2, meat: 4 }
+
+const mapFromObject = new Map(Object.entries(objectFromMap));
+console.log(mapFromObject.get("meat")); // 4
+```
+
+## bind
+
+This example demonstrates how the `bind` method is used to fix the `this` context of a function.
+
+In JavaScript, methods like `setTimeout` lose the original object context when passing a function reference.
+Using `bind`, we can permanently associate a method with its object (`user`), ensuring `this.firstName` refers to the correct value.
+
+This is useful when passing object methods as callbacks, especially in asynchronous operations.
+
+```js filename="bind" copy
+const user = {
+  firstName: "John",
+  sayHi() {
+    console.log(`Hello, ${this.firstName}!`);
+  },
+};
+
+user.sayHi(); // Hello, John!
+setTimeout(user.sayHi, 0); // Hello, undefined!
+
+// solution 1
+setTimeout(function () {
+  user.sayHi(); // Hello, John!
+}, 0);
+// or shorter
+setTimeout(() => user.sayHi(), 0); // Hello, John!
+
+// solution 2
+const sayHi = user.sayHi.bind(user);
+// can run it without an object
+sayHi(); // Hello, John!
+setTimeout(sayHi, 0); // Hello, John!
+```
+
+## Async Generators
+
+This example demonstrates how to use an `async function*` (asynchronous generator) to yield values over time with a delay.
+The `generateSequence` function yields numbers from `start` to `end`, waiting one second between each using `await`.
+
+The `for await...of` loop is used to consume the generator asynchronously, making it perfect for streaming data,
+timers, or controlled iteration over async events.
+
+```js filename="async generator" copy
+async function* generateSequence(start, end) {
+  for (let i = start; i <= end; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    yield i;
+  }
+}
+
+const timer = async (callback) => {
+  const generator = generateSequence(1, 5);
+  for await (let value of generator) {
+    callback(value);
+  }
+};
+
+timer(console.log).catch(console.error);
+// 1, 2, 3, 4, 5 (with delay between)
+```
+
+## Fibonacci
+
+The [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number) is a series where each number is the sum of the two preceding ones:
+**`1, 1, 2, 3, 5, 8, 13, 21, ...`**
+
+This example shows two ways to calculate the `n`-th Fibonacci number:
+
+### 🔁 Iterative Approach
+
+Efficient and suitable for large values of `n` (like 77). Uses a loop and keeps track of the last two values.
+
+```js filename="fibonacci" copy
+function fib(n) {
+  let a = 1;
+  let b = 1;
+  for (let i = 3; i <= n; i++) {
+    let c = a + b;
+    a = b;
+    b = c;
+  }
+  return b;
+}
+
+console.log(fib(3)); // 2
+console.log(fib(7)); // 13
+console.log(fib(77)); // 5527939700884757
+```
+
+### 🔁 Recursive Approach
+Elegant but inefficient for large `n` due to repeated calculations (exponential time complexity). Best for learning recursion.
+
+
+```js filename="fibonacci recursive" copy
+function fib(n) {
+  return n <= 1 ? n : fib(n - 1) + fib(n - 2);
+}
+
+console.log(fib(3)); // 2
+console.log(fib(7)); // 13
+console.log(fib(77)); // -
+```

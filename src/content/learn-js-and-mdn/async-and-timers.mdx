@@ -1,0 +1,195 @@
+---
+title: JavaScript Timing Utilities - Delay, Debounce, Throttle, setTimeout, and setInterval
+description: Learn to control function timing in JavaScript using delay decorators, debounce, throttle, setTimeout, and setInterval. Understand how to manage execution timing, prevent spamming, and handle async side effects properly.
+sidebarTitle: Delay, Throttling and Debounce
+---
+
+# JavaScript Delay, Debounce, Throttle, and Async Execution
+
+Master JavaScript's timing mechanisms like `delay`, `debounce`, `throttle`, `setTimeout`, and `setInterval`.
+These tools help control execution flow, improve performance, and manage async behavior — most common question on interviews.
+
+## Delay Decorator
+
+This example defines a `delay` decorator that wraps a function and delays its execution by a specified number of milliseconds.
+
+It preserves the correct `this` context using `Function.prototype.apply`, allowing methods from different
+objects to be delayed without losing their binding. Useful for debouncing, throttling, or deferring side effects.
+
+
+```js filename="delay decorator" copy
+const obj1 = {
+  info: "obj1 info",
+  showInfo(...args) {
+    console.log(`${args}: ${this.info}`);
+  },
+};
+
+const obj2 = {
+  info: "obj2 info",
+};
+
+function delay(f, ms) {
+  return function (...args) {
+    setTimeout(() => {
+      // Uses apply to handle `this` dynamically
+      f.apply(this, args);
+    }, ms);
+  };
+}
+
+obj1.delayedShowInfo = delay(obj1.showInfo, 1000);
+obj2.delayedShowInfo = delay(obj1.showInfo, 1000);
+
+obj1.delayedShowInfo("Info", "one"); // Info,one: obj1 info
+obj2.delayedShowInfo("Info"); // Info: obj2 info
+```
+
+## Delaying function execution with and without context (`this`)
+
+This example shows how to create a `delay` utility that defers a function's execution by a
+specified time using `setTimeout`. It works great for standalone functions but does **not preserve `this` context** when used with object methods.
+
+For object methods, `Function.prototype.bind` or `apply` should be used to retain proper context.
+
+```js filename="delay and this" copy
+function delay(f, ms) {
+  return function (...args) {
+    setTimeout(() => {
+      f(...args);
+    }, ms);
+  };
+}
+
+function showDetails(name, age) {
+  console.log(`Name: ${name}, Age: ${age}`);
+}
+
+const delayedShowDetails = delay(showDetails, 1000);
+delayedShowDetails("Alice", 25);
+// Name: Alice, Age: 25
+
+const obj1 = {
+  info: "obj1 info",
+  showInfo(prefix) {
+    console.log(`${prefix}: ${this?.info}`);
+  },
+};
+
+obj1.delayedShowInfo = delay(obj1.showInfo, 1000);
+obj1.delayedShowInfo("Info", "one"); // Info: undefined
+```
+
+## Output Every Second
+
+[setTimeout and setInterval](https://javascript.info/settimeout-setinterval)
+
+This example demonstrates two ways to print numbers at 1-second intervals using `setInterval` and recursive `setTimeout`.
+Both approaches achieve the same result, but `setTimeout` gives finer control over the delay between executions — especially useful for dynamic scheduling or error handling.
+
+
+### setInterval
+
+```js copy
+function printNumbers(from, to) {
+  let current = from;
+  let timerId;
+
+  function go() {
+    console.log(current);
+    if (current === to) {
+      clearInterval(timerId);
+    }
+    current++;
+  }
+
+  go();
+  timerId = setInterval(go, 1000);
+}
+
+printNumbers(5, 10);
+// 5 immediately, and 6 to 10 with 1s between
+```
+
+### setTimeout
+
+```js copy
+function printNumbers(from, to) {
+  let current = from;
+
+  function go() {
+    console.log(current);
+    if (current < to) {
+      setTimeout(go, 1000);
+    }
+    current++;
+  }
+
+  go();
+}
+
+printNumbers(5, 10);
+// 5 immediately, and 6 to 10 with 1s between
+```
+
+## throttling and debounce decorator
+
+[call-apply-decorators](https://javascript.info/call-apply-decorators)
+
+Compared to the debounce decorator, throttling is completely different:
+- `debounce` runs the function once after the "cooldown" period.
+- `throttle` runs it not more often than given `ms` time
+
+### debounce
+
+```js filename="debounce" copy
+function debounce(func, ms) {
+  let timeout;
+
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), ms);
+  };
+}
+
+const timeLoggedConsoleLog = (...args) => {
+  console.log(`Logged after ${Date.now() - startTime} ms:`, ...args);
+};
+
+const startTime = Date.now();
+const f = debounce(timeLoggedConsoleLog, 500);
+
+f("a");
+setTimeout(() => f("b"), 200);
+setTimeout(() => f("c"), 600);
+setTimeout(() => f("d"), 600);
+setTimeout(() => f("e"), 600); // Logged after 1118 ms: e
+```
+
+### throttling
+
+```js filename="throttle" copy
+function throttle(fn, limit) {
+  let inThrottle;
+
+  return function (...args) {
+    if (inThrottle) return;
+    fn.apply(this, args);
+    inThrottle = true;
+    setTimeout(() => (inThrottle = false), limit);
+  };
+}
+
+const timeLoggedConsoleLog = (...args) => {
+  console.log(`Logged after ${Date.now() - startTime} ms:`, ...args);
+};
+
+const startTime = Date.now();
+const f = throttle(timeLoggedConsoleLog, 500);
+
+f("a"); // Logged after 0 ms: a
+setTimeout(() => f("b"), 200);
+setTimeout(() => f("c"), 600); // Logged after 613 ms: c
+setTimeout(() => f("d"), 600);
+setTimeout(() => f("e"), 600);
+```

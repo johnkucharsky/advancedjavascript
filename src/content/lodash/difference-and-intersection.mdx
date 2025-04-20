@@ -1,0 +1,127 @@
+---
+title: JavaScript Set Utilities – difference, differenceBy, intersection, union
+description: Learn how to recreate Lodash-style set utilities in JavaScript using Set, array methods, and custom logic. Covers difference, differenceBy, intersection, and union with practical code examples.
+sidebarTitle: Difference, Intersection, Union
+---
+
+# JavaScript Set Utilities: `difference`, `differenceBy`, `intersection`, `union`
+
+Reimplement Lodash's most common set operations using native JavaScript. Learn how to compare arrays, remove duplicates, and find overlaps using `Set`
+and concise functional patterns.
+
+## difference
+
+The [`_.difference()`](https://lodash.com/docs/4.17.15#difference) method returns the elements from
+the first array that are not present in any of the other arrays provided. It computes the difference
+by using the `Set` data structure for efficient lookups.
+
+This custom implementation compares two arrays and finds the elements unique to each array, returning the
+differences in two parts: one for elements in `arr1` but not in `arr2`, and one for elements in `arr2` but not in `arr1`.
+
+```js filename="difference" copy
+const findDifference = function (arr1, arr2) {
+  const set1 = new Set(arr1);
+  const set2 = new Set(arr2);
+
+  const diffLeft = [];
+  const diffRight = [];
+
+  for (const item of set1) {
+    if (!set2.has(item)) diffLeft.push(item);
+  }
+
+  for (const item of set2) {
+    if (!set1.has(item)) diffRight.push(item);
+  }
+
+  return [diffLeft, diffRight];
+};
+
+const array1 = [2, 1, 3];
+const array2 = [2, 3];
+const result = findDifference(array1, array2);
+console.log(result); // [ [ 1 ], [] ]
+```
+
+## differenceBy
+
+The [`_.differenceBy()`](https://lodash.com/docs/4.17.15#differenceBy) method works like `difference()`,
+but allows you to compare elements by a specific property or transformation function. You pass a key or
+iteratee to compare the objects by their properties.
+
+In this custom implementation, we compare objects in `arr1` and `arr2` by a key (`x`), and return the
+differences based on that key.
+
+```js filename="differenceBy" copy
+const differenceBy = (arr1, arr2, key) => {
+  const set2 = new Set(arr2.map((item) => item[key]));
+  const set1 = new Set(arr1.map((item) => item[key]));
+
+  const diffLeft = [];
+  const diffRight = [];
+
+  for (const item of arr1) {
+    if (!set2.has(item[key])) {
+      diffLeft.push(item);
+    }
+  }
+
+  for (const item of arr2) {
+    if (!set1.has(item[key])) {
+      diffRight.push(item);
+    }
+  }
+
+  return [diffLeft, diffRight];
+};
+
+const array1 = [{ x: 2 }, { x: 1 }, { x: 1 }];
+const array2 = [{ x: 1 }];
+const result = differenceBy(array1, array2, "x");
+console.log(result); // [ [ { x: 2 } ], [] ]
+```
+
+## intersection
+
+The [`_.intersection()`](https://lodash.com/docs/4.17.15#intersection) method
+computes the intersection of two or more arrays. It returns a new array containing the
+elements that are present in all provided arrays.
+
+This custom implementation compares two arrays by converting them to `Set` objects for
+efficient lookup and finding the common elements between them.
+
+```js filename="intersection" copy
+const intersection = function (nums1, nums2) {
+  const set1 = new Set(nums1);
+  const set2 = new Set(nums2);
+  const result = [];
+
+  for (const nums of set2) {
+    if (set1.has(nums)) {
+      result.push(nums);
+    }
+  }
+
+  return result;
+};
+
+console.log(intersection([2, 1], [2, 3])); // [ 2 ]
+```
+
+## union
+
+The [`_.union()`](https://lodash.com/docs/4.17.15#union) method creates a new array of unique values by
+combining all given arrays, preserving the order of elements.
+
+This custom implementation utilizes the `Set` object to remove duplicates and `concat()` to merge all arrays before
+applying `Array.from()` to convert the set back into an array.
+
+
+```js filename="union" copy
+const union = (...arrays) => {
+  return Array.from(new Set([].concat(...arrays)));
+};
+
+console.log(union([1, 2], [1, 7, 7], [3, 1]));
+// [ 1, 2, 7, 3 ]
+```

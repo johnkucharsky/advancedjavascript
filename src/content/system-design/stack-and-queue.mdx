@@ -1,0 +1,174 @@
+---
+title: Queue and Stack Patterns in JavaScript
+description: Queue and Stack data structures in JavaScript. Synchronous and asynchronous queues, stack-based palindrome checking.
+sidebarTitle: Queue and Stack
+---
+
+# Queue and Stack Patterns in JavaScript
+
+Queue and stack data structures with real JavaScript implementations. This page includes examples of synchronous and asynchronous queues, stack,
+stack-based palindrome checking.
+
+## AsyncQueue: Processing Promises Sequentially
+
+An `AsyncQueue` class that processes asynchronous tasks in sequence. Each task is a function returning a
+Promise, and tasks are executed one after another in the order they were added.
+
+```js filename="async queue" copy
+class AsyncQueue {
+  constructor() {
+    this.queue = [];
+  }
+
+  enqueue(task) {
+    if (typeof task !== "function") {
+      throw new Error("Task must be a function returning a promise");
+    }
+    this.queue.push(task);
+  }
+
+  async process() {
+    const results = [];
+
+    for (const task of this.queue) {
+      const result = await task();
+      results.push(result);
+    }
+
+    return results;
+  }
+}
+
+const queue = new AsyncQueue();
+queue.enqueue(
+  () =>
+    new Promise((resolve) => {
+      setTimeout(() => resolve("Task 1"), 1000);
+    }),
+);
+queue.enqueue(
+  () =>
+    new Promise((resolve) => {
+      setTimeout(() => resolve("Task 2"), 500);
+    }),
+);
+
+queue.process().then((results) => console.log(results));
+// ['Task 1', 'Task 2']
+```
+
+## Queue Implementation: First-In, First-Out (FIFO)
+
+A simple `Queue` class that follows the **FIFO (First In, First Out)** principle. Elements are added to the end and removed from the front.
+
+Commonly used in scheduling, task queues, and breadth-first search algorithms.
+
+```js filename="queue" copy
+class Queue {
+  constructor() {
+    this.collection = [];
+  }
+
+  enqueue(element) {
+    this.collection.push(element);
+    return this;
+  }
+  dequeue() {
+    this.collection.shift();
+    return this;
+  }
+  front() {
+    return this.collection[0];
+  }
+  get size() {
+    return this.collection.length;
+  }
+  isEmpty() {
+    return this.collection.length === 0;
+  }
+}
+
+const queue = new Queue();
+queue.enqueue("one").enqueue("two");
+// [ 'one', 'two' ]
+queue.dequeue(); // [ 'two' ]
+queue.enqueue("three").enqueue("four");
+// [ 'two', 'three', 'four' ]
+queue.front(); // two
+queue.size; // 3
+queue.isEmpty(); // false
+```
+
+
+## Using a Stack to Check for Palindromes
+
+This function uses a **stack** to check if a given word is a palindrome. It pushes each character onto the stack, then pops
+them in reverse order to compare with the original string.
+
+```js filename="stack palindrome" copy
+function isPalindrome(word) {
+  const letters = []; // this is our stack
+  let reversedWord = "";
+
+  // put letters of word into stack
+  for (let i = 0; i < word.length; i++) {
+    letters.push(word[i]);
+  }
+
+  // pop off the stack in reverse order
+  for (let i = 0; i < word.length; i++) {
+    reversedWord += letters.pop();
+  }
+
+  return reversedWord === word;
+}
+
+console.log(isPalindrome("racecar")); // true
+console.log(isPalindrome("cheatsheet")); // false
+```
+
+## Stack Implementation: Last-In, First-Out (LIFO)
+
+A basic `Stack` class implementation that follows **LIFO (Last In, First Out)** behavior.
+Includes common methods such as `push`, `pop`, `peek`, and `size`.
+
+Useful for:
+- Undo functionality
+- Recursion
+- Reversing data
+
+```js filename="stack" copy
+class Stack {
+  constructor() {
+    this.storage = [];
+  }
+
+  push(value) {
+    this.storage.push(value);
+    return this;
+  }
+
+  pop() {
+    this.storage.pop();
+    return this;
+  }
+
+  size() {
+    return this.storage.length;
+  }
+
+  peek() {
+    return this.storage[this.storage.length - 1];
+  }
+}
+
+const myStack = new Stack();
+
+myStack.push(1).push(2).push(3);
+console.log(myStack.peek()); // 3
+myStack.pop();
+console.log(myStack.peek()); // 2
+myStack.push("js-cheatsheet");
+console.log(myStack.size()); // 3
+console.log(myStack.peek()); // js-cheatsheet
+```

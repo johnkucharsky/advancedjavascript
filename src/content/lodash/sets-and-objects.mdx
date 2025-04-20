@@ -1,0 +1,190 @@
+---
+title: JavaScript Object Utilities – keyBy, omit, orderBy, pick, curry
+description: Recreate Lodash's keyBy, omit, orderBy, pick, and curry methods in vanilla JavaScript. Learn functional patterns and object transformations with clean, reusable examples.
+sidebarTitle: Object Utilities
+---
+
+# JavaScript Object Utilities: `keyBy`, `omit`, `orderBy`, `pick`, `curry`
+
+This guide covers powerful utility functions inspired by Lodash — including ways to transform objects, sort data, extract or exclude fields,
+and write curried functions — all with custom JavaScript implementations.
+
+## keyBy
+
+The [`_.keyBy()`](https://lodash.com/docs/4.17.15#keyBy) method creates an object composed of
+keys generated from the results of running each element in the collection through an iteratee
+function. The iteratee can be a function or property name.
+
+This custom implementation maps each item in the collection to a key determined by the provided iteratee,
+and then assigns the item to that key in the result object.
+
+```js filename="keyBy" copy
+function keyBy(collection, iteratee) {
+  const result = {};
+
+  for (const item of collection) {
+    const key =
+      typeof iteratee === "function" ? iteratee(item) : item[iteratee];
+    result[key] = item;
+  }
+
+  return result;
+}
+
+const array = [
+  { dir: "left", code: 97 },
+  { dir: "right", code: 100 },
+];
+
+const res1 = keyBy(array, ({ code }) => String.fromCharCode(code));
+console.log(res1);
+// { a: { dir: 'left', code: 97 }, d: { dir: 'right', code: 100 } }
+
+const res2 = keyBy(array, "dir");
+console.log(res2);
+// { left: { dir: 'left', code: 97 }, right: { dir: 'right', code: 100 } }
+```
+
+## omit
+
+The [`_.omit()`](https://lodash.com/docs/4.17.15#omit) method creates a shallow copy of an object without the
+specified properties. The properties to omit can be provided as a single key or an array of keys.
+
+This custom implementation removes the given properties from the object by first creating a copy and then deleting the specified keys.
+
+```js filename="omit" copy
+function omit(obj, keys) {
+  const result = { ...obj };
+
+  if (!Array.isArray(keys)) {
+    delete result[keys];
+    return result;
+  }
+
+  for (const key of keys) {
+    delete result[key];
+  }
+
+  return result;
+}
+
+const user = {
+  name: "Alice",
+  age: 25,
+  email: "alice@example.com",
+  city: "Wonderland",
+};
+
+const omitted = omit(user, "age");
+console.log(omitted);
+// { name: 'Alice', email: 'alice@example.com', city: 'Wonderland' }
+
+const omitted2 = omit(user, ["age", "email"]);
+console.log(omitted2);
+// { name: 'Alice', city: 'Wonderland' }
+```
+
+## orderBy
+
+The [`_.orderBy()`](https://lodash.com/docs/4.17.15#orderBy) method sorts an array of objects based on
+one or more properties. You can specify the sort order for each property as either ascending (`"asc"`) or descending (`"desc"`).
+
+This custom implementation replicates the `_.orderBy()` method by accepting an array, a property to sort by, and
+an optional order parameter (`"asc"` by default). The array is first copied to avoid mutation, then sorted based on the specified property and order.
+
+```js filename="orderBy" copy
+function orderBy(array, property, order = "asc") {
+  const multiplier = order === "asc" ? 1 : -1;
+  const copy = [...array];
+
+  return copy.sort((a, b) => {
+    if (a[property] < b[property]) return -1 * multiplier;
+    if (a[property] > b[property]) return 1 * multiplier;
+    return 0;
+  });
+}
+
+const users = [
+  { user: "barney", age: 36 },
+  { user: "fred", age: 40 },
+  { user: "pebbles", age: 1 },
+];
+
+const sortedByAgeAsc = orderBy(users, "age", "asc");
+console.log(sortedByAgeAsc);
+// [
+//   { user: 'pebbles', age: 1 },
+//   { user: 'barney', age: 36 },
+//   { user: 'fred', age: 40 }
+// ]
+
+const sortedByUserDesc = orderBy(users, "user", "desc");
+console.log(sortedByUserDesc);
+// [
+//   { user: 'pebbles', age: 1 },
+//   { user: 'fred', age: 40 },
+//   { user: 'barney', age: 36 }
+// ]
+```
+
+## pick
+
+The [`_.pick()`](https://lodash.com/docs/4.17.15#pick) method creates a new object by picking
+the specified properties from an existing object. It accepts either a single key or an array of keys to extract.
+
+This custom implementation mimics the `_.pick()` method by using `reduce()` to iterate over the array of
+keys and select only the properties that exist in the source object, returning a new object with the selected properties.
+
+```js filename="pick" copy
+function pick(obj, keys) {
+  if (typeof keys === "string") {
+    return obj[keys] !== undefined ? { [keys]: obj[keys] } : {};
+  }
+
+  return (Array.isArray(keys) ? keys : []).reduce((result, key) => {
+    if (key in obj) {
+      result[key] = obj[key];
+    }
+    return result;
+  }, {});
+}
+
+const user = {
+  name: "Alice",
+  age: 25,
+  email: "alice@example.com",
+  city: "Wonderland",
+};
+
+const picked = pick(user, ["name", "email"]);
+console.log(picked);
+// { name: 'Alice', email: 'alice@example.com' }
+```
+
+## curry
+
+The [`_.curry()`](https://lodash.com/docs/4.17.15#curry) function in Lodash transforms a
+function into a curried version that can be called with a series of partial arguments. Instead of
+calling the function with all arguments at once, you can call it progressively, one argument at a time.
+
+This example shows a custom implementation of currying for the `sum` function, allowing it to be invoked
+with one argument at a time or multiple arguments in a sequence.
+
+```js filename="curry" copy
+function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn(...args);
+    } else {
+      return (...nextArgs) => curried(...args, ...nextArgs);
+    }
+  };
+}
+
+const sum = (a, b, c) => a + b + c;
+const curriedSum = curry(sum);
+
+console.log(curriedSum(1)(2)(3)); // 6
+console.log(curriedSum(1, 2)(3)); // 6
+console.log(curriedSum(1)(2, 3)); // 6
+```

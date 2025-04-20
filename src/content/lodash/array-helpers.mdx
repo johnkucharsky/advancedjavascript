@@ -1,0 +1,91 @@
+---
+title: Lodash-like Array Utilities in JavaScript – chunk, compact, and partition
+description: Learn how to recreate Lodash's chunk, compact, and partition methods from scratch in plain JavaScript.
+sidebarTitle: Chunk, Compact, Partition
+---
+
+# JavaScript Array Utilities: `chunk`, `compact`, and `partition`
+
+These utility functions are inspired by Lodash and solve common data transformation problems.
+
+## chunk
+
+The [`_.chunk()`](https://lodash.com/docs/4.17.15#chunk) function in Lodash splits an array into
+smaller arrays, or "chunks," of a specified size. It returns a new array of chunks, making it easier to
+manage large datasets by dividing them into smaller, more manageable parts.
+
+This example demonstrates a custom implementation of Lodash's `_.chunk()` function to achieve the same result.
+
+```js filename="chunk" copy
+const chunk = (inputArray, quantity) => {
+  return inputArray.reduce((resultArray, item, index) => {
+    const chunkIndex = Math.floor(index / quantity);
+
+    if (!resultArray[chunkIndex]) {
+      resultArray[chunkIndex] = []; // start a new chunk
+    }
+
+    resultArray[chunkIndex].push(item);
+
+    return resultArray;
+  }, []);
+};
+
+const perChunk = 2; // items per chunk
+const inputArray = ["a", "b", "c", "d", "e"];
+
+console.log(chunk(inputArray, perChunk));
+// [['a','b'], ['c','d'], ['e']]
+```
+
+## compact
+
+The [`_.compact()`](https://lodash.com/docs/4.17.15#compact) function in Lodash creates an array by removing
+all falsey values from the provided array. Falsey values include `false`, `null`, `0`, `""`, `undefined`, and `NaN`.
+This is useful for cleaning up arrays and removing unwanted, invalid values.
+
+This example shows a custom implementation of Lodash's `_.compact()` function to filter out falsey values from the input array.
+
+```js filename="compact" copy
+const compact = (inputArray) => inputArray.filter(Boolean);
+
+const inputArray = ["a", false, null, 0, "", undefined, NaN, "d"];
+console.log(compact(inputArray)); // [ 'a', 'd' ]
+```
+
+## partition
+
+The [`_.partition()`](https://lodash.com/docs/4.17.15#partition) method splits an array into two groups
+based on a predicate function. The first group contains elements for which the predicate returns truthy,
+and the second group contains elements for which the predicate returns falsey. The predicate function is
+invoked with one argument: the value of the element.
+
+This custom implementation mimics the `_.partition()` method by using the `reduce()` function to iterate over
+the array and push elements into two arrays based on the result of the predicate.
+
+```js filename="partition" copy
+function partition(array, predicate) {
+  return array.reduce(
+    (result, element) => {
+      result[predicate(element) ? 0 : 1].push(element);
+      return result;
+    },
+    [[], []],
+  );
+}
+
+const users = [
+  { user: "barney", age: 36, active: false },
+  { user: "fred", age: 40, active: true },
+  { user: "pebbles", age: 1, active: false },
+];
+
+const [active, inactive] = partition(users, (user) => user.active);
+console.log(active);
+// [{ 'user': 'fred', 'age': 40, 'active': true }]
+console.log(inactive);
+// [
+//   { user: 'barney', age: 36, active: false },
+//   { user: 'pebbles', age: 1, active: false }
+// ]
+```

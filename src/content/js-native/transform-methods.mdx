@@ -1,0 +1,366 @@
+---
+title: JavaScript Array Transformation Methods (map, filter, reduce, flat)
+description: Learn how to transform, filter, flatten, and reshape arrays in JavaScript with methods like map, filter, flat, flatMap, join, reduce, and slice — including custom polyfills and practical examples.
+sidebarTitle: Transform Methods
+---
+
+# JavaScript Array Transformation Methods
+
+This section explores essential JavaScript array methods used for transforming, reshaping, and extracting data — including `map()`, `filter()`, `reduce()`, `flat()`, `flatMap()`, `join()`, and `slice()`.
+These methods return new arrays or values without modifying the original input. Learn how they work internally with custom polyfills and practical use cases
+such as flattening arrays, formatting output, building pipelines, and working with nested structures.
+
+## Array.filter
+
+The [`filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+method creates a **shallow copy** of an array, including only elements that pass the test implemented by the provided callback function.
+It’s ideal for narrowing down data based on conditions, like filtering by length, type, or custom logic.
+
+This example includes a custom implementation of `Array.prototype.filter()` and practical use cases like filtering long words or prime numbers.
+
+```js filename="filter" copy
+Array.prototype.myFilter = function (callback) {
+  const result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    if (callback(this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+
+  return result;
+};
+
+const words = ["spray", "elite", "exuberant", "destruction", "present"];
+
+const result = words.myFilter((word) => word.length > 6);
+
+console.log(result);
+// ["exuberant", "destruction", "present"]
+
+const array = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+function isPrime(num) {
+  for (let i = 2; num > i; i++) {
+    if (num % i === 0) {
+      return false;
+    }
+  }
+  return num > 1;
+}
+
+console.log(array.myFilter(isPrime)); // [ 2, 3, 5, 7 ]
+```
+
+## Array.flat
+
+The [`flat()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat)
+method creates a new array with all sub-array elements **recursively flattened** up to the specified depth.
+It's useful for simplifying nested arrays into a single-level array — or flattening deeply nested structures with `Infinity`.
+
+This example provides a custom implementation of `Array.prototype.flat()`, supporting variable depth.
+
+```js filename="flat" copy
+Array.prototype.customFlat = function (depth = 1) {
+  const result = [];
+
+  const flatten = (array, depth) => {
+    for (const item of array) {
+      if (Array.isArray(item) && depth > 0) {
+        flatten(item, depth - 1);
+      } else {
+        result.push(item);
+      }
+    }
+  };
+  flatten(this, depth);
+
+  return result;
+};
+
+const arr = [0, 1, [2, [3, [4, 5]]]];
+console.log(arr.customFlat());
+// [0, 1, 2, [3, [4, 5]]]
+console.log(arr.customFlat(2));
+// [0, 1, 2, 3, [4, 5]]
+console.log(arr.customFlat(Infinity));
+// [0, 1, 2, 3, 4, 5]
+```
+
+## Array.flatMap
+
+The [`flatMap()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap)
+method first maps each element using a given callback function, then **flattens the result by one level**.
+It behaves like `array.map(...).flat()`, but is more efficient and expressive for nested transformations.
+
+This example demonstrates both native usage and a custom implementation of `Array.prototype.flatMap()` using a real-world data structure.
+
+```js filename="flatMap" copy
+Array.prototype.customFlatMap = function (callback, thisArg) {
+  const result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    const mapped = callback.call(thisArg, this[i], i, this);
+
+    if (Array.isArray(mapped)) {
+      result.push(...mapped); // Use spread operator for flattening
+    } else {
+      result.push(mapped);
+    }
+  }
+
+  return result;
+};
+
+const data = [
+  {
+    id: 1,
+    name: "Category A",
+    items: [
+      {
+        id: 2,
+        name: "Subcategory A1",
+      },
+      {
+        id: 5,
+        name: "Subcategory A2",
+      },
+    ],
+  },
+  {
+    id: 8,
+    name: "Category B",
+    items: [
+      {
+        id: 9,
+        name: "Subcategory B1",
+      },
+      {
+        id: 12,
+        name: "Subcategory B2",
+      },
+    ],
+  },
+];
+
+const items = data
+  .map((category) =>
+    category.items.map((item) => ({
+      ...item,
+      category: category.name,
+    })),
+  )
+  .flat();
+console.log(items);
+// [
+//   { id: 2, name: 'Subcategory A1', category: 'Category A' },
+//   { id: 5, name: 'Subcategory A2', category: 'Category A' },
+//   { id: 9, name: 'Subcategory B1', category: 'Category B' },
+//   { id: 12, name: 'Subcategory B2', category: 'Category B' }
+// ]
+
+const items2 = data.customFlatMap((category) =>
+  category.items.map((item) => ({
+    ...item,
+    category: category.name,
+  })),
+);
+console.log(items2);
+// ...same result
+```
+
+## Array.join
+
+The [`join()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join)
+method creates and returns a **string** by concatenating all elements of an array, separated by a specified string (default is a comma).
+If the array has only one item, that item is returned as-is. It’s useful for formatting output or combining array values into CSV-like strings.
+
+This example includes a custom implementation of `Array.prototype.join()` that replicates the native behavior.
+
+```js filename="join" copy
+Array.prototype.customJoin = function (separator = ",") {
+  let result = "";
+
+  for (let i = 0; i < this.length; i++) {
+    if (i > 0) {
+      result += separator;
+    }
+
+    result += this[i];
+  }
+
+  return result;
+};
+
+const elements = ["Fire", "Air", "Water"];
+console.log(elements.customJoin()); // "Fire,Air,Water"
+console.log(elements.customJoin("")); // "FireAirWater"
+console.log(elements.customJoin("-")); // "Fire-Air-Water"
+
+const matrix = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+];
+console.log(matrix.customJoin()); // 1,2,3,4,5,6,7,8,9
+console.log(matrix.customJoin(";")); // 1,2,3;4,5,6;7,8,9
+```
+
+## Array.map
+
+The [`map()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+method creates a **new array** populated with the results of calling a provided function on every element in the original array.
+It's a key tool for transforming data structures in a clean, functional style — especially for UI rendering, data formatting, or calculations.
+
+This example includes a custom implementation of `Array.prototype.map()` along with common use cases like doubling values,
+reformatting objects, and calculating cumulative sums.
+
+```js filename="map" copy
+Array.prototype.customMap = function (callbackFn) {
+  if (typeof callbackFn !== "function") {
+    throw new TypeError("Callback must be a function");
+  }
+
+  const arr = [];
+  for (let i = 0; i < this.length; i++) {
+    arr.push(callbackFn(this[i], i, this));
+  }
+
+  return arr;
+};
+
+const array1 = [1, 4, 9, 16];
+const doubled = array1.customMap((x) => x * 2);
+console.log(doubled); // [ 2, 8, 18, 32 ]
+
+const kvArray = [
+  { key: 1, value: 10 },
+  { key: 2, value: 20 },
+  { key: 3, value: 30 },
+];
+const formattedArray = kvArray.customMap(({ key, value }) => ({
+  [key]: value,
+}));
+console.log(formattedArray); // [ { 1: 10 }, { 2: 20 }, { 3: 30 } ]
+
+console.log(["1", "2", "3"].customMap(Number)); // [ 1, 2, 3 ]
+
+const numbers2 = [1, 2, 3, 4, 5];
+const cumulativeSum = numbers2.customMap((num, idx, arr) => {
+  // Calculate cumulative sum by adding the current number to the sum of previous numbers
+  const previousSum =
+    idx > 0 ? arr.slice(0, idx).reduce((acc, curr) => acc + curr, 0) : 0;
+  return previousSum + num;
+});
+console.log(cumulativeSum); // [ 1, 3, 6, 10, 15 ]
+```
+
+## Array.reduce
+
+The [`reduce()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+method executes a user-defined "reducer" callback function on each element of the array, in order.
+It accumulates a **single value** by applying the callback function and passing the result from one iteration to the next.
+
+The method can accept an **optional initial value**, and if not provided, it defaults to the first element in the array.
+This custom implementation mimics the native behavior.
+
+This example demonstrates usage of `reduce` for both synchronous and asynchronous operations, including practical examples
+like summing an array and composing a pipeline of functions.
+
+```js filename="reduce" copy
+Array.prototype.customReduce = function (callback, initialValue) {
+  let accumulator = initialValue !== undefined ? initialValue : this[0];
+
+  const startIndex = initialValue !== undefined ? 0 : 1;
+
+  for (let i = startIndex; i < this.length; i++) {
+    accumulator = callback(accumulator, this[i], i, this);
+  }
+
+  return accumulator;
+};
+
+const array1 = [15, 16, 17, 18, 19];
+
+const sumWithInitial = array1.customReduce((acc, cur) => acc + cur, 0);
+console.log(sumWithInitial); // 85
+
+const sumWithoutInitial = array1.customReduce((acc, cur) => acc + cur);
+console.log(sumWithoutInitial); // 85
+
+const pipe =
+  (...functions) =>
+  (initialValue) =>
+    functions.customReduce((acc, fn) => fn(acc), initialValue);
+
+const double = (x) => x * 2;
+const triple = (x) => x * 3;
+
+const multiply6 = pipe(double, triple);
+const multiply9 = pipe(triple, triple);
+
+console.log(multiply6(6)); // 36
+console.log(multiply9(9)); // 81
+
+const asyncPipe =
+  (...functions) =>
+  (initialValue) =>
+    functions.reduce((acc, fn) => acc.then(fn), Promise.resolve(initialValue));
+
+const p1 = async (a) => a * 5;
+const p2 = async (a) =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => resolve(a * 2), 1000);
+  });
+const f3 = (a) => a * 3;
+const p4 = async (a) => a * 4;
+
+asyncPipe(p1, p2, f3, p4)(10).then(console.log); // 1200
+
+const asyncPipeAsync =
+  (...functions) =>
+  (initialValue) =>
+    functions.reduce(async (acc, fn) => fn(await acc), initialValue);
+
+asyncPipeAsync(p1, p2, f3, p4)(10).then(console.log); // 1200
+```
+
+## Array.slice
+
+The [`slice()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice)
+method returns a **shallow copy** of a portion of an array into a new array,
+without modifying the original array. The selection is made from `start` index to `end` index (excluding the `end` element).
+
+This custom implementation of `Array.prototype.slice()` replicates the native behavior, with support for negative indexing.
+
+```js filename="slice" copy
+Array.prototype.customSlice = function (start = 0, end) {
+  const length = this.length;
+  let endIndex = end || length;
+
+  if (start < 0) {
+    start = Math.max(length + start, 0);
+  }
+  if (endIndex < 0) {
+    endIndex = Math.max(length + endIndex, 0);
+  }
+
+  const result = [];
+
+  for (let i = start; i < endIndex && i < length; i++) {
+    result.push(this[i]);
+  }
+
+  return result;
+};
+
+const animals = ["ant", "bison", "camel", "duck", "elephant"];
+
+console.log(animals.customSlice(2));
+// ["camel", "duck", "elephant"]
+console.log(animals.customSlice(2, 4)); // ["camel", "duck"]
+console.log(animals.customSlice(-2)); // ["duck", "elephant"]
+console.log(animals.customSlice(2, -1)); // ["camel", "duck"]
+console.log(animals.customSlice());
+// ["ant", "bison", "camel", "duck", "elephant"]
+```

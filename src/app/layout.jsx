@@ -7,11 +7,6 @@ import "./global.css";
 
 export const metadata = {
   metadataBase: new URL("https://www.advancedjavascript.org"),
-  title: {
-    template: "%s - Advanced JavaScript.",
-  },
-  description:
-    "JavaScript snippets based on real interview questions and job tasks, crafted to give you hands-on experience with advanced concepts.",
   applicationName: "Advanced JavaScript",
   generator: "Next.js",
   appleWebApp: {
@@ -46,7 +41,7 @@ export default async function RootLayout({ children }) {
         <div>
           <div>Advanced JavaScript</div>{" "}
           <div style={{ opacity: "60%", fontSize: "13px" }}>
-            Practical, real-world knowledge
+            Snippets from Real Interviews
           </div>
         </div>
       }
