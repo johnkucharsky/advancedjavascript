@@ -2,6 +2,8 @@
 import { Layout, Navbar } from "nextra-theme-docs";
 import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/react";
 import "nextra-theme-docs/style.css";
 import "./global.css";
 
@@ -53,6 +55,9 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
+      <Analytics />
+      <GoogleAnalytics gaId={"G-KWQLDVETTW"} />
+      <GoogleTagManager gtmId={"GTM-P4PTVL7P"} />
       <Head faviconGlyph="✦" />
       <body>
         <Layout
