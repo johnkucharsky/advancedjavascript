@@ -62,8 +62,8 @@ export default async function RootLayout({ children }) {
         <Image
           src={"/download.svg"}
           alt={"download"}
-          width={24}
-          height={24}
+          width={20}
+          height={20}
         />{" "}
       </Link>
     </Navbar>
