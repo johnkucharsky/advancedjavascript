@@ -6,6 +6,8 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/react";
 import "nextra-theme-docs/style.css";
 import "./global.css";
+import Image from "next/image";
+import Link from "next/link";
 
 export const metadata = {
   metadataBase: new URL("https://www.advancedjavascript.org"),
@@ -48,7 +50,23 @@ export default async function RootLayout({ children }) {
         </div>
       }
       projectLink={"https://github.com/JohnKucharsky/advancedjavascript"}
-    />
+    >
+      <Link
+        href="/advanced-javascript.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        download={true}
+        style={{ display: "flex", flexDirection: "row" }}
+      >
+        PDF
+        <Image
+          src={"/download.svg"}
+          alt={"download"}
+          width={24}
+          height={24}
+        />{" "}
+      </Link>
+    </Navbar>
   );
 
   const pageMap = await getPageMap();
