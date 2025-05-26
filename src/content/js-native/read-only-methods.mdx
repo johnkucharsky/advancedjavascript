@@ -7,62 +7,8 @@ sidebarTitle: Read Methods
 # Native JavaScript Array Methods - Read Methods
 
 This collection includes non-mutating JavaScript array methods reimplemented from scratch. Explore how methods like
-`at()`, `find()`, `every()`, `some()`, `includes()`, and `indexOf()` behave internally — all of which access or test array values without
+`find()`, `at()`, `every()`, `some()`, `includes()`, and `indexOf()` behave internally — all of which access or test array values without
 modifying the original array.
-
-## Array.at
-
-The [`at()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/at)
-method takes an integer and returns the item at that index — supporting both **positive and negative** integers.
-Negative values count from the end of the array, making it cleaner than using `array.length - index`.
-
-This example shows a custom implementation of `Array.prototype.at()` to mimic the native behavior.
-
-```js filename="at" copy
-Array.prototype.customAt = function (index) {
-  if (index < 0) {
-    index = this.length + index;
-  }
-
-  return this[index];
-};
-
-const array1 = [5, 12, 8, 130, 44];
-console.log(array1.customAt(-1)); // 44
-```
-
-## Array.every
-
-The [`every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every)
-method tests whether **all elements** in an array pass the test implemented by the provided callback.
-It returns a **boolean** — `true` if all elements satisfy the condition, and `false` otherwise.
-
-This example includes a custom implementation of `Array.prototype.every()` and shows how it can be used for subset checks.
-
-```js filename="every" copy
-Array.prototype.customEvery = function (callback) {
-  for (let i = 0; i < this.length; i++) {
-    if (!callback(this[i], i)) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-const arr = [1, 30, 39, 29, 10, 13];
-
-console.log(arr.customEvery((currentValue) => currentValue > 40));
-// false
-console.log(arr.customEvery((currentValue) => currentValue < 40));
-// true
-
-const isSubset = (array1, array2) =>
-  array2.customEvery((element) => array1.includes(element));
-
-console.log(isSubset([1, 2, 3, 4, 5, 6, 7], [5, 7, 6])); // true
-console.log(isSubset([1, 2, 3, 4, 5, 6, 7], [5, 8, 7])); // false
-```
 
 ## Array.find
 
@@ -149,6 +95,60 @@ const array1 = [5, 12, 8, 130, 44];
 const found = array1.customFindLast((element) => element > 10);
 console.log(found); // 44
 ```
+## Array.at
+
+The [`at()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/at)
+method takes an integer and returns the item at that index — supporting both **positive and negative** integers.
+Negative values count from the end of the array, making it cleaner than using `array.length - index`.
+
+This example shows a custom implementation of `Array.prototype.at()` to mimic the native behavior.
+
+```js filename="at" copy
+Array.prototype.customAt = function (index) {
+  if (index < 0) {
+    index = this.length + index;
+  }
+
+  return this[index];
+};
+
+const array1 = [5, 12, 8, 130, 44];
+console.log(array1.customAt(-1)); // 44
+```
+
+## Array.every
+
+The [`every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every)
+method tests whether **all elements** in an array pass the test implemented by the provided callback.
+It returns a **boolean** — `true` if all elements satisfy the condition, and `false` otherwise.
+
+This example includes a custom implementation of `Array.prototype.every()` and shows how it can be used for subset checks.
+
+```js filename="every" copy
+Array.prototype.customEvery = function (callback) {
+  for (let i = 0; i < this.length; i++) {
+    if (!callback(this[i], i)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const arr = [1, 30, 39, 29, 10, 13];
+
+console.log(arr.customEvery((currentValue) => currentValue > 40));
+// false
+console.log(arr.customEvery((currentValue) => currentValue < 40));
+// true
+
+const isSubset = (array1, array2) =>
+  array2.customEvery((element) => array1.includes(element));
+
+console.log(isSubset([1, 2, 3, 4, 5, 6, 7], [5, 7, 6])); // true
+console.log(isSubset([1, 2, 3, 4, 5, 6, 7], [5, 8, 7])); // false
+```
+
 
 ## Array.includes
 
